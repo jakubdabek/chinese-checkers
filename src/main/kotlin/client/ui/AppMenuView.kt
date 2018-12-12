@@ -1,7 +1,9 @@
 package client.ui
 
+import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.image.ImageView
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import tornadofx.*
@@ -27,12 +29,10 @@ class AppMenuView : View("Chinese checkers") {
             vbox {
                 menuVBox = this
                 alignment = Pos.TOP_CENTER
+                addClass(Styles.mainVBox)
                 vboxConstraints {
                     spacing = 20.0
                     vGrow = Priority.ALWAYS
-                }
-                style {
-                    backgroundColor += c("orange")
                 }
                 imageview("chinesecheckers.png") {
                     fitToParentSize()
@@ -40,21 +40,56 @@ class AppMenuView : View("Chinese checkers") {
                     scaleX = 0.70
                     imageLogo = this
                 }
-                fieldset {
+                hbox {
                     alignment = Pos.TOP_CENTER
-                    spacing = 20.0
-                    button("Play with computer") {
-                        addClass(Styles.button)
-                        action(menuViewController::playWithComputerClickHandler)
+                    spacing = 60.0
+                    fieldset {
+                        alignment = Pos.BASELINE_CENTER
+                        spacing = 20.0
+                        button("Play with computer") {
+                            addClass(Styles.button)
+                            action(menuViewController::playWithComputerClickHandler)
+                        }
+                        button("Play with human players") {
+                            addClass(Styles.button)
+                            action(menuViewController::playWithHumanPlayersClickHandler)
+                        }
                     }
-                    button("Play with human players") {
-                        addClass(Styles.button)
-                        action(menuViewController::playWithHumanPlayersClickHandler)
-                    }
+                    fieldset {
+                        alignment = Pos.TOP_CENTER
+                        spacing = 10.0
+                        prefWidthProperty().bind(this@hbox.widthProperty() / 6)
 
+                        text("Number of players") { addClass(Styles.label15) }
+                        hbox {
+                            alignment = Pos.BASELINE_CENTER
+                            spacing = 20.0
+                            text("2") {addClass(Styles.label15)}
+                            togglebutton {
+                                addClass(Styles.checkbox)
+                                prefWidth = 30.0
+                                prefHeight = 30.0
+                            }
+                        }
+                        createHBoxForCheckBox("3",this@fieldset)
+                        createHBoxForCheckBox("4",this@fieldset)
+                        createHBoxForCheckBox("6",this@fieldset)
+                    }
                 }
-
             }
         }
+    }
+    private fun createHBoxForCheckBox(str: String,parent: EventTarget) : HBox {
+         return opcr(parent,hbox {
+            alignment = Pos.BASELINE_CENTER
+            spacing = 20.0
+            text(str){addClass(Styles.label15)}
+            togglebutton {
+                isSelected = false
+                addClass(Styles.checkbox)
+                prefWidth = 30.0
+                prefHeight = 30.0
+            }
+        })
     }
 }

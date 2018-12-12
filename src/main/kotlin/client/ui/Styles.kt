@@ -7,7 +7,10 @@ class Styles : Stylesheet() {
     companion object {
         val button by cssclass()
         val label by cssclass()
+        val label15 by cssclass()
         val mainVBox by cssclass()
+        val gamePanel by cssclass()
+        val checkbox by cssclass()
     }
     init {
         button {
@@ -26,6 +29,21 @@ class Styles : Stylesheet() {
         }
         mainVBox {
             backgroundColor += c("orange")
+        }
+        gamePanel {
+            backgroundColor += c("orange")
+        }
+        checkbox {
+            fontSize = 15.px
+            backgroundRadius = multi(box(15.px))
+            backgroundColor += c("red")
+            and(selected) {
+                backgroundColor += c("green")
+            }
+        }
+        label15 {
+            fontSize =15.px
+            fontFamily = Font.SANS_SERIF
         }
     }
 }
