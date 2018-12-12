@@ -11,6 +11,9 @@ class Styles : Stylesheet() {
         val mainVBox by cssclass()
         val gamePanel by cssclass()
         val checkbox by cssclass()
+        val unselectedField by cssclass()
+        val selectedField by cssclass()
+        val colorPicker by cssclass()
     }
     init {
         button {
@@ -44,6 +47,13 @@ class Styles : Stylesheet() {
         label15 {
             fontSize =15.px
             fontFamily = Font.SANS_SERIF
+        }
+        colorPicker {
+            backgroundColor += c("transparent")
+            fontSize = 10.px
+            colorLabelVisible =false
+            arrowsVisible = false
+
         }
     }
 }

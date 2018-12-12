@@ -41,10 +41,10 @@ class AppMenuView : View("Chinese checkers") {
                     imageLogo = this
                 }
                 hbox {
-                    alignment = Pos.TOP_CENTER
+                    alignment = Pos.CENTER
                     spacing = 60.0
-                    fieldset {
-                        alignment = Pos.BASELINE_CENTER
+                    vbox {
+                        alignment = Pos.CENTER
                         spacing = 20.0
                         button("Play with computer") {
                             addClass(Styles.button)
@@ -55,7 +55,7 @@ class AppMenuView : View("Chinese checkers") {
                             action(menuViewController::playWithHumanPlayersClickHandler)
                         }
                     }
-                    fieldset {
+                    vbox {
                         alignment = Pos.TOP_CENTER
                         spacing = 10.0
                         prefWidthProperty().bind(this@hbox.widthProperty() / 6)
@@ -71,9 +71,9 @@ class AppMenuView : View("Chinese checkers") {
                                 prefHeight = 30.0
                             }
                         }
-                        createHBoxForCheckBox("3",this@fieldset)
-                        createHBoxForCheckBox("4",this@fieldset)
-                        createHBoxForCheckBox("6",this@fieldset)
+                        createHBoxForCheckBox("3",this@vbox)
+                        createHBoxForCheckBox("4",this@vbox)
+                        createHBoxForCheckBox("6",this@vbox)
                     }
                 }
             }
