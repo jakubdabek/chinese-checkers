@@ -10,6 +10,8 @@ data class HexCoord(val x: Int, val y: Int) {
 
     fun move(x: Int = 0, y: Int = 0, z: Int = 0) =
         HexCoord(this.x + x, this.y + y, this.z + z)
+
+    override fun toString() = "HexCoord(x=$x, y=$y, z=$z)"
 }
 
 val HexCoord.neighbours
