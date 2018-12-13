@@ -1,5 +1,8 @@
 package common
 
-interface Message {
+import java.io.Serializable
+
+
+interface Message : Serializable {
     val content: Any?
 }

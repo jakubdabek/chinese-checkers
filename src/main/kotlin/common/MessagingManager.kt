@@ -47,6 +47,14 @@ class MessagingManager(
         }
     }
 
+    fun sendMessage(message: Message) {
+        objectOutput.writeObject(message)
+    }
+
+    fun sendMessageAsync(message: Message) {
+        queue.put(message)
+    }
+
     override fun equals(other: Any?) =
         super.equals(other) || (other is MessagingManager && connectionId == other.connectionId)
 
