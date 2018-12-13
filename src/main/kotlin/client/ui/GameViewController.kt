@@ -1,10 +1,12 @@
 package client.ui
 
 import client.model.GameManager
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
 import javafx.scene.shape.Circle
 import tornadofx.*
 
@@ -12,10 +14,14 @@ class GameViewController : Controller() {
     private lateinit var gameManager: GameManager
     private lateinit var boardViewAdapter: BoardViewAdapter
     private val view: AppGameView by inject()
+    val availableColors = listOf<Color>(Color.RED,Color.GREEN,Color.YELLOW,Color.DARKVIOLET,Color.ORANGE,Color.DARKBLUE)
+    val chosenColorProperty: SimpleObjectProperty<Paint> = SimpleObjectProperty(Color.DARKSLATEGREY)
+    val chosenColor by chosenColorProperty
 
     internal fun initGameManager(gameManager: GameManager) {
+        chosenColorProperty.set(availableColors[0])
         this.gameManager = gameManager
-        boardViewAdapter = BoardViewAdapter(gameManager)
+        boardViewAdapter = BoardViewAdapter(gameManager,availableColors,chosenColor)
     }
 
     fun getBoard() : Pane {
