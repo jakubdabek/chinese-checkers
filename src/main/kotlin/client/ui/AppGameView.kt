@@ -34,12 +34,13 @@ class AppGameView : View() {
             center = vbox {
 
                 alignment = Pos.CENTER
-                style { backgroundColor += c("darkgray") }
+                style { backgroundColor += c("E8C8C1") }
                 stackpane {
                     prefHeightProperty().bind(primaryStage.heightProperty())
                     prefWidthProperty().bind(primaryStage.widthProperty())
                     alignment = Pos.CENTER
                     val cp = colorpicker {
+                        value = c("00E244")
                         chosenColorProperty.bind(valueProperty())
                         addClass(Styles.colorPicker)
                     }
@@ -51,6 +52,7 @@ class AppGameView : View() {
                 }
                 hbox {
                     alignment = Pos.CENTER_RIGHT
+                    spacing = 10.0
                     paddingRightProperty.bind(this@hbox.widthProperty() / 8)
                     paddingBottomProperty.bind(this@vbox.heightProperty() / 8)
                     text("READY") { addClass(Styles.label15) }
@@ -59,14 +61,16 @@ class AppGameView : View() {
                         addClass(Styles.checkbox)
                         prefWidth = 30.0
                         prefHeight = 30.0
+                        action({startGame()})
                     }
                 }
             }
             bottom {
                 hbox {
+                    fitToParentWidth()
                     footer = this
                     pane {
-                        fitToParentWidth()
+                        prefWidthProperty().bind(primaryStage.widthProperty())
                         prefHeight = 35.0
                         style {
                             backgroundColor += c("black")
@@ -77,6 +81,9 @@ class AppGameView : View() {
         }
     }
     fun startGame() {
-        root.center = controller.getBoard()
+        val board= controller.getBoard()
+//        board.prefHeightProperty().bind(primaryStage.heightProperty())
+//        board.prefWidthProperty().bind(primaryStage.widthProperty())
+        root.center = board
     }
 }
