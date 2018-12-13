@@ -27,10 +27,16 @@ class MessagingManager(
                     val toSend = queue.poll(100, TimeUnit.MILLISECONDS) ?: break
                     objectOutput.writeObject(toSend)
                 }
-                if (objectInput.available() > 0) {
+                if (inputStream.available() > 0) {
                     val message = objectInput.readObject() as Message
                     onMessageReceived(message)
                 }
+            } catch (ex: InterruptedIOException) {
+                if (!onError(ex, false))
+                    return
+            } catch (ex: InterruptedException) {
+                if (!onError(ex, false))
+                    return
             } catch (ex: ClassNotFoundException) {
                 onError(ex, true)
                 return
