@@ -2,11 +2,12 @@ package client.model
 
 import common.Message
 import common.MessagingManager
+import common.chinesecheckers.ChineseCheckerServerMessage
+import common.chinesecheckers.ChineseCheckersGame
 import java.net.Socket
 import kotlin.concurrent.thread
 
-const val DEFAULT_PORT = 8888
-const val CONNECTION_ID = 1
+
 
 //val comms = CommunicationManager()
 //
@@ -18,22 +19,26 @@ const val CONNECTION_ID = 1
 //    //comms.messagingManager...
 //}
 
-class CommunicationManager() {
+class CommunicationManager {
+    val DEFAULT_PORT = 8888
+    val CONNECTION_ID = 1
+
     lateinit var messagingManager: MessagingManager
-    fun launch(ip: String) {
-        val socket = Socket(ip, DEFAULT_PORT)
-        messagingManager = MessagingManager(
-            CONNECTION_ID,
-            socket.getInputStream(),
-            socket.getOutputStream(),
-            this::onMessageReceived,
-            this::onError
-        )
-//        messagingManager.launch()
-//
-//        val t = thread {
-//
-//        }
+    lateinit var gameManager: GameManager
+        private set
+    private lateinit var thread: Thread
+    fun launch(ip: String, port: Int = DEFAULT_PORT) {
+        thread = thread {
+            val socket = Socket(ip, port)
+            messagingManager = MessagingManager(
+                CONNECTION_ID,
+                socket.getInputStream(),
+                socket.getOutputStream(),
+                this::onMessageReceived,
+                this::onError
+            )
+            messagingManager.launch()
+        }
     }
 
     private fun onError(connectionId: Int, ex: Exception?, fatal: Boolean): Boolean {
