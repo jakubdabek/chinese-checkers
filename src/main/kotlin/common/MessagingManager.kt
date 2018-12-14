@@ -12,7 +12,7 @@ class MessagingManager(
     private val outputStream: OutputStream,
     onMessageReceived: (connectionId: Int, Message) -> Unit,
     onError: (connectionId: Int, ex: Exception?, fatal: Boolean) -> Boolean
-) {
+) : AutoCloseable {
     private val objectInput: ObjectInputStream = ObjectInputStream(inputStream)
     private val objectOutput: ObjectOutputStream = ObjectOutputStream(outputStream)
     private val onMessageReceived: (Message) -> Unit = { onMessageReceived(connectionId, it) }
@@ -59,6 +59,12 @@ class MessagingManager(
 
     fun sendMessageAsync(message: Message) {
         queue.put(message)
+    }
+
+    override fun close() {
+        val list = mutableListOf(objectInput, objectOutput, inputStream, outputStream)
+        for (closeable in list)
+            closeable.close()
     }
 
     override fun equals(other: Any?) =
