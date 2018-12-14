@@ -15,6 +15,7 @@ class Styles : Stylesheet() {
         val selectedField by cssclass()
         val colorPicker by cssclass()
     }
+
     init {
         button {
             prefWidth = 300.px
@@ -31,10 +32,10 @@ class Styles : Stylesheet() {
             fontFamily = Font.SANS_SERIF
         }
         mainVBox {
-            backgroundColor += c("orange")
+            backgroundColor += c("lightgray")
         }
         gamePanel {
-            backgroundColor += c("orange")
+            backgroundColor += c("lightgray")
         }
         checkbox {
             fontSize = 15.px
@@ -45,13 +46,13 @@ class Styles : Stylesheet() {
             }
         }
         label15 {
-            fontSize =15.px
+            fontSize = 15.px
             fontFamily = Font.SANS_SERIF
         }
         colorPicker {
             backgroundColor += c("transparent")
             fontSize = 10.px
-            colorLabelVisible =false
+            colorLabelVisible = false
             arrowsVisible = false
 
         }

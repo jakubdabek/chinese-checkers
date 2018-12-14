@@ -4,12 +4,11 @@ import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
-import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import tornadofx.*
 import java.lang.Math.*
 
-class AppGameView : View() {
+class AppGameView : View("Chinese checkers") {
     private lateinit var controller: GameViewController
     private lateinit var footer: HBox
     //private var chosenColor = Color.DARKSLATEGREY
@@ -17,11 +16,11 @@ class AppGameView : View() {
     init {
         controller = find()
     }
+
     override fun onDock() {
         controller = find()
         //root.center = controller.getBoard()
     }
-
 
 
     override val root = with(this) {
@@ -31,9 +30,20 @@ class AppGameView : View() {
         primaryStage.minWidth = AppMenuView.MIN_WIDTH
         return@with borderpane {
             addClass(Styles.gamePanel)
+            top {
+                hbox {
+                    style {
+                        backgroundColor += c("black")
+                    }
+                    visibleProperty().set(false)
+                    prefWidthProperty().bind(primaryStage.widthProperty())
+                    button("END TURN") { }
+
+                }
+            }
             center = vbox {
                 alignment = Pos.CENTER
-                style { backgroundColor += c("E8C8C1") }
+                addClass(Styles.gamePanel)
                 stackpane {
                     prefHeightProperty().bind(primaryStage.heightProperty())
                     prefWidthProperty().bind(primaryStage.widthProperty())
@@ -43,7 +53,7 @@ class AppGameView : View() {
 //                        chosenColorProperty.bind(valueProperty())
 //                        addClass(Styles.colorPicker)
 //                    }
-                    val cp = createColorPickerHBox(controller.availableColors,this@stackpane)
+                    val cp = createColorPickerHBox(controller.availableColors, this@stackpane)
                     circle(0.0, 0.0, 120.0) {
                         onMouseClicked = EventHandler { cp.visibleProperty().set(true) }
                         fillProperty().bind(controller.chosenColorProperty)
@@ -61,17 +71,17 @@ class AppGameView : View() {
                         addClass(Styles.checkbox)
                         prefWidth = 30.0
                         prefHeight = 30.0
-                        action({startGame()})
+                        action({ startGame() })
                     }
                 }
             }
             bottom {
                 hbox {
-                    fitToParentWidth()
+                    visibleProperty().set(false)
                     footer = this
                     pane {
                         prefWidthProperty().bind(primaryStage.widthProperty())
-                        prefHeight = 35.0
+                        prefHeight = 25.0
                         style {
                             backgroundColor += c("black")
                         }
@@ -80,29 +90,41 @@ class AppGameView : View() {
             }
         }
     }
-    fun startGame() {
-        val board= controller.getBoard()
+
+    private fun startGame() {
+
+        val board = controller.getBoard()
 //        board.prefHeightProperty().bind(primaryStage.heightProperty())
 //        board.prefWidthProperty().bind(primaryStage.widthProperty())
+        root.top.visibleProperty().set(true)
+        root.bottom.visibleProperty().set(true)
         root.center = board
     }
 
-    private fun createColorPickerHBox(colors: List<Color>,parent: EventTarget) : HBox {
+    private fun createColorPickerHBox(colors: List<Color>, parent: EventTarget): HBox {
         return opcr(parent, hbox {
             pane {
-            prefWidthProperty().bind(this@hbox.widthProperty())
-            paddingTop = 10.0
-            var counter: Double = 0.0
-            for (col in colors) {
-                val c = circle(0.0 ,primaryStage.height/2 - 270 * sin(PI/5 * counter),40) {
-                    fill = col
-                    centerXProperty().bind(this@pane.widthProperty()/2.0 - colors.size/2.0*80+40 +counter * 80 - 50*cos(PI/5 * counter))
-                    onMouseClicked = EventHandler {controller.chosenColorProperty.set(this.fill); this@hbox.visibleProperty().set(false)}
+                prefWidthProperty().bind(this@hbox.widthProperty())
+                paddingTop = 10.0
+                var counter: Double = 0.0
+                for (col in colors) {
+                    val c = circle(0.0, primaryStage.height / 2 - 270 * sqrt((sin(PI / 5 * counter))), 40) {
+                        fill = col
+                        centerXProperty().bind(
+                            this@pane.widthProperty() / 2.0 - colors.size / 2.0 * 80 + 40 + counter * 80 - 50 * cos(
+                                PI / 5 * counter
+                            )
+                        )
+                        onMouseClicked = EventHandler {
+                            controller.chosenColorProperty.set(this.fill)
+                            this@hbox.visibleProperty().set(false)
+                        }
+                    }
+                    println(c)
+                    counter++
                 }
-                println(c)
-                counter++
+                this@hbox.visibleProperty().set(false)
             }
-            this@hbox.visibleProperty().set(false)
-        }})
+        })
     }
 }

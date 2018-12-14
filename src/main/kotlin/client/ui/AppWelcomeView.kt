@@ -10,11 +10,12 @@ import tornadofx.*
 
 class AppWelcomeView : View("Chinese checkers") {
     companion object {
-        const val DEFAULT_HEIGHT = 600.0
+        const val DEFAULT_HEIGHT = 620.0
         const val DEFAULT_WIDTH = 800.0
-        const val MIN_HEIGHT = 600.0
+        const val MIN_HEIGHT = 620.0
         const val MIN_WIDTH = 800.0
     }
+
     private val welcomeViewController: WelcomeViewController by inject()
     private lateinit var rootVBox: VBox
     private lateinit var menuVBox: VBox

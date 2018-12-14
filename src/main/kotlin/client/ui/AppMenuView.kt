@@ -10,13 +10,14 @@ import tornadofx.*
 
 class AppMenuView : View("Chinese checkers") {
     companion object {
-        const val DEFAULT_HEIGHT = 600.0
-        const val DEFAULT_WIDTH = 800.0
-        const val MIN_HEIGHT = 600.0
-        const val MIN_WIDTH = 800.0
+        const val DEFAULT_HEIGHT = AppWelcomeView.DEFAULT_HEIGHT
+        const val DEFAULT_WIDTH = AppWelcomeView.DEFAULT_WIDTH
+        const val MIN_HEIGHT = AppWelcomeView.MIN_HEIGHT
+        const val MIN_WIDTH = AppWelcomeView.MIN_WIDTH
     }
+
     private val menuViewController: MenuViewController by inject()
-    private lateinit var rootVBox: VBox
+    lateinit var rootVBox: VBox
     lateinit var menuVBox: VBox
     lateinit var imageLogo: ImageView
     override val root = with(this) {
@@ -64,26 +65,27 @@ class AppMenuView : View("Chinese checkers") {
                         hbox {
                             alignment = Pos.BASELINE_CENTER
                             spacing = 20.0
-                            text("2") {addClass(Styles.label15)}
+                            text("2") { addClass(Styles.label15) }
                             togglebutton {
                                 addClass(Styles.checkbox)
                                 prefWidth = 30.0
                                 prefHeight = 30.0
                             }
                         }
-                        createHBoxForCheckBox("3",this@vbox)
-                        createHBoxForCheckBox("4",this@vbox)
-                        createHBoxForCheckBox("6",this@vbox)
+                        createHBoxForCheckBox("3", this@vbox)
+                        createHBoxForCheckBox("4", this@vbox)
+                        createHBoxForCheckBox("6", this@vbox)
                     }
                 }
             }
         }
     }
-    private fun createHBoxForCheckBox(str: String,parent: EventTarget) : HBox {
-         return opcr(parent,hbox {
+
+    private fun createHBoxForCheckBox(str: String, parent: EventTarget): HBox {
+        return opcr(parent, hbox {
             alignment = Pos.BASELINE_CENTER
             spacing = 20.0
-            text(str){addClass(Styles.label15)}
+            text(str) { addClass(Styles.label15) }
             togglebutton {
                 isSelected = false
                 addClass(Styles.checkbox)
