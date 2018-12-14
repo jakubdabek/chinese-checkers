@@ -3,6 +3,7 @@ package client.ui
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.TextField
+import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import tornadofx.*
@@ -24,6 +25,7 @@ class AppWelcomeView : View("Chinese checkers") {
         primaryStage.width = DEFAULT_WIDTH
         primaryStage.minHeight = MIN_HEIGHT
         primaryStage.minWidth = MIN_WIDTH
+        primaryStage.icons.add(Image("/icon2.png"))
         return@with vbox {
             rootVBox = this
             vbox {
