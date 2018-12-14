@@ -1,7 +1,5 @@
 package common
 
-import java.awt.Color
-
 class SixSidedStarBoard(val innerHexagonSizeLength: Int) {
     val fields: Map<HexCoord, Field>
     val conditions = mapOf(
