@@ -72,7 +72,7 @@ class AppGameView : View("Chinese checkers") {
                         addClass(Styles.checkbox)
                         prefWidth = 30.0
                         prefHeight = 30.0
-                        action({ startGame() })
+                        action(controller::startGame)
                     }
                 }
             }
@@ -90,16 +90,6 @@ class AppGameView : View("Chinese checkers") {
                 }
             }
         }
-    }
-
-    private fun startGame() {
-
-        val board = controller.getBoard()
-//        board.prefHeightProperty().bind(primaryStage.heightProperty())
-//        board.prefWidthProperty().bind(primaryStage.widthProperty())
-        root.top.visibleProperty().set(true)
-        root.bottom.visibleProperty().set(true)
-        root.center = board
     }
 
     private fun createColorPickerHBox(colors: List<Color>, parent: EventTarget): Pane {

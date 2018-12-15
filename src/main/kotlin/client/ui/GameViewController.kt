@@ -24,15 +24,15 @@ class GameViewController : Controller() {
         chosenColorProperty.set(availableColors[0])
         gameManager.setMessageProducedHandler(client::sendMessageToServer)
         gameManager.setGameEventHandler(this::handleGameEvent)
-        gameManager.game.corners[0] = 0
-        gameManager.game.corners[1] = 3
+//        gameManager.game.corners[0] = 0
+//        gameManager.game.corners[1] = 3
         this.gameManager = gameManager
 
     }
 
     private fun handleGameEvent(event: GameManager.Event) {
         when (event) {
-
+            GameManager.Event.GameStarted -> startGame()
             GameManager.Event.TurnStarted -> TODO()
             GameManager.Event.AvailableMovesChanged -> TODO()
             GameManager.Event.GameEndedInterrupted -> TODO()
@@ -60,5 +60,12 @@ class GameViewController : Controller() {
     fun exitGame() {
         gameManager.exitGame()
         view.replaceWith<AppMenuView>()
+    }
+
+    fun startGame() {
+        val board = getBoard()
+        view.root.top.isVisible = true
+        view.root.bottom.isVisible = true
+        view.root.center = board
     }
 }
