@@ -18,8 +18,7 @@ class GameManager(
         onPlayersChanged: (List<Response>) -> Unit
     ) : this(maxPlayers, allowBots, onPlayersChanged, onPlayersChanged)
 
-    private val game: ChineseCheckersGame =
-        ChineseCheckersGame(SixSidedStarBoard(5))
+    val game: ChineseCheckersGame = ChineseCheckersGame(SixSidedStarBoard(5))
 
     fun tryAddPlayer(player: Player): Boolean {
         if (game.players.size > maxPlayers || (allowBots && game.players.size > 0))

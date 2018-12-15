@@ -2,13 +2,14 @@ package common.chinesecheckers
 
 import common.Player
 import common.SixSidedStarBoard
+import java.io.Serializable
 
 
 class ChineseCheckersGame(
     val board: SixSidedStarBoard,
     val players: MutableList<Player> = mutableListOf(),
     val corners: MutableMap<Player.Id, Int> = mutableMapOf()
-) {
+) : Serializable {
     fun fillBoardCorners(cornerIdsMap: Map<Player.Id, Int>) {
         if (cornerIdsMap.values.any { it !in 0..5 })
             throw IllegalArgumentException("Board has 6 corners")

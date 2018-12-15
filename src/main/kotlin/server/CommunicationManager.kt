@@ -76,6 +76,7 @@ class CommunicationManager {
     }
 
     private fun receiveMessage(connectionId: MessagingManager.Id, message: Message) {
+        logInfo("Message received from ${connectionId.value}: $message")
         when (message) {
             is ChineseCheckerServerMessage -> handleInternalMessage(connectionId, message)
             is ChineseCheckersGameMessage -> handleGameMessage(connectionId, message)
@@ -138,7 +139,8 @@ class CommunicationManager {
                     }
                 }
                 games[connection.player.id] = assignedGame
-
+                connection.messagingManager.sendMessage(
+                    ChineseCheckersGameMessage.GameAssigned(assignedGame.game))
             }
         }
     }
