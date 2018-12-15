@@ -2,6 +2,7 @@ package client.ui
 
 import client.model.GameManager
 import common.HexCoord
+import common.Player
 import javafx.beans.property.ObjectProperty
 import javafx.scene.Node
 import javafx.scene.input.MouseEvent
@@ -41,9 +42,7 @@ class BoardViewAdapter(
         println(cornersAndColors)
     }
 
-    fun getBoard(playerId: Int): Pane {
-
-
+    fun getBoard(playerId: Player.Id): Pane {
         val pane = Pane()
         for ((key, value) in fields) {
             val c = Circle(15.0, c("603BB7"))

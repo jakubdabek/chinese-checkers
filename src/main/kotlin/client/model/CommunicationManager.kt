@@ -44,11 +44,11 @@ class CommunicationManager {
         }
     }
 
-    private fun onError(connectionId: Int, ex: Exception?, fatal: Boolean): Boolean {
+    private fun onError(connectionId: MessagingManager.Id, ex: Exception?, fatal: Boolean): Boolean {
         TODO("not implemented")
     }
 
-    private fun onMessageReceived(connectionId: Int, message: Message) {
+    private fun onMessageReceived(connectionId: MessagingManager.Id, message: Message) {
         notifyAllObservers(message)
     }
 

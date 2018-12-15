@@ -7,16 +7,17 @@ import java.util.concurrent.TimeUnit
 
 
 class MessagingManager(
-    val connectionId: Int,
+    connectionId: Int,
     private val inputStream: InputStream,
     private val outputStream: OutputStream,
-    onMessageReceived: (connectionId: Int, Message) -> Unit,
-    onError: (connectionId: Int, ex: Exception?, fatal: Boolean) -> Boolean
+    onMessageReceived: (connectionId: Id, Message) -> Unit,
+    onError: (connectionId: Id, ex: Exception?, fatal: Boolean) -> Boolean
 ) : AutoCloseable {
+    val connectionId = Id(connectionId)
     private val objectInput: ObjectInputStream = ObjectInputStream(inputStream)
     private val objectOutput: ObjectOutputStream = ObjectOutputStream(outputStream)
-    private val onMessageReceived: (Message) -> Unit = { onMessageReceived(connectionId, it) }
-    private val onError: (ex: Exception?, fatal: Boolean) -> Boolean = { ex, fatal -> onError(connectionId, ex, fatal) }
+    private val onMessageReceived: (Message) -> Unit = { onMessageReceived(this.connectionId, it) }
+    private val onError: (ex: Exception?, fatal: Boolean) -> Boolean = { ex, fatal -> onError(this.connectionId, ex, fatal) }
     private val queue: BlockingQueue<Message> = LinkedBlockingQueue<Message>()
 
 
@@ -72,4 +73,5 @@ class MessagingManager(
 
     override fun hashCode() = connectionId.hashCode()
 
+    data class Id(val value: Int)
 }

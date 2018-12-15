@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
+import utility.*
 import tornadofx.*
 
 class GameViewController : Controller() {
