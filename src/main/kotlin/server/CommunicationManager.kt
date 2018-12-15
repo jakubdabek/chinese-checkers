@@ -53,7 +53,7 @@ class CommunicationManager {
     private fun launchConnection(messagingManager: MessagingManager) {
         val id = Random.nextUniqueInt(connections.values.map { it.player.id.value })
         val player = Player(id, "User#$id")
-        val t = thread {
+        val t = thread(false) {
             try {
                 messagingManager.use { it.launch() }
             } catch (ex: Exception) {

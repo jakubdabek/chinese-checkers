@@ -14,8 +14,8 @@ class MessagingManager(
     onError: (connectionId: Id, ex: Exception?, fatal: Boolean) -> Boolean
 ) : AutoCloseable {
     val connectionId = Id(connectionId)
-    private val objectInput: ObjectInputStream = ObjectInputStream(inputStream)
     private val objectOutput: ObjectOutputStream = ObjectOutputStream(outputStream)
+    private val objectInput: ObjectInputStream = ObjectInputStream(inputStream)
     private val onMessageReceived: (Message) -> Unit = { onMessageReceived(this.connectionId, it) }
     private val onError: (ex: Exception?, fatal: Boolean) -> Boolean = { ex, fatal -> onError(this.connectionId, ex, fatal) }
     private val queue: BlockingQueue<Message> = LinkedBlockingQueue<Message>()
