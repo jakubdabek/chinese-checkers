@@ -10,7 +10,6 @@ import kotlin.concurrent.thread
 
 
 internal class MessagingManagerTest {
-
     private lateinit var messagingManager: MessagingManager
     private lateinit var connection: ConnectionMock
 
@@ -41,18 +40,17 @@ internal class MessagingManagerTest {
         fun readMessage(): Message {
             return inputObjectInputStream.readObject() as Message
         }
-
     }
 
 
-    private var currentErrorDelegate: ((Int, Exception?, Boolean) -> Boolean)? = null
-    private var currentMessageDelegate: ((Int, Message) -> Unit)? = null
+    private var currentErrorDelegate: ((MessagingManager.Id, Exception?, Boolean) -> Boolean)? = null
+    private var currentMessageDelegate: ((MessagingManager.Id, Message) -> Unit)? = null
 
-    private fun onError(connectionId: Int, exception: Exception?, fatal: Boolean): Boolean {
+    private fun onError(connectionId: MessagingManager.Id, exception: Exception?, fatal: Boolean): Boolean {
         return currentErrorDelegate?.invoke(connectionId, exception, fatal) ?: false
     }
 
-    private fun receiveMessage(connectionId: Int, message: Message) {
+    private fun receiveMessage(connectionId: MessagingManager.Id, message: Message) {
         currentMessageDelegate?.invoke(connectionId, message)
     }
 
