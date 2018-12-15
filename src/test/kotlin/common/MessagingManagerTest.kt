@@ -85,7 +85,7 @@ internal class MessagingManagerTest {
     }
 
     @Test
-    fun readOneTest() {
+    fun `writing one message to the stream and checking whether it was delivered`() {
         val usedMessage = ChineseCheckersGameMessage.TurnStarted
         val count = AtomicInteger(0)
         currentMessageDelegate = { connectionId, message ->
@@ -136,7 +136,7 @@ internal class MessagingManagerTest {
     }
 
     @Test
-    fun writeResponseTest() {
+    fun `sending a response message`() {
         val usedMessage = ChineseCheckersGameMessage.TurnStarted
         val count = AtomicInteger(0)
         currentMessageDelegate = { _, _ ->
@@ -188,7 +188,7 @@ internal class MessagingManagerTest {
     }
 
     @Test
-    fun equalsTest() {
+    fun `testing equals on 2 objects with the same id`() {
         val connectionMock = ConnectionMock()
         val messagingManager2 = MessagingManager(
             123,
@@ -200,5 +200,20 @@ internal class MessagingManagerTest {
 
         Assertions.assertEquals(messagingManager.hashCode(), messagingManager2.hashCode())
         Assertions.assertEquals(messagingManager, messagingManager2)
+    }
+
+    @Test
+    fun `testing equals on 2 objects with different ids`() {
+        val connectionMock = ConnectionMock()
+        val messagingManager2 = MessagingManager(
+            999,
+            connectionMock.outputPipeInputStream,
+            connectionMock.inputPipeOutputStream,
+            { _, _ -> },
+            { _, _, _ -> false }
+        )
+
+        Assertions.assertNotEquals(messagingManager.hashCode(), messagingManager2.hashCode())
+        Assertions.assertNotEquals(messagingManager, messagingManager2)
     }
 }

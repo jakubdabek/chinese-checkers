@@ -4,9 +4,10 @@ import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
+import javafx.scene.transform.Affine
 import tornadofx.*
-import java.lang.Math.*
 
 class AppGameView : View("Chinese checkers") {
     private lateinit var controller: GameViewController
@@ -101,31 +102,28 @@ class AppGameView : View("Chinese checkers") {
         root.center = board
     }
 
-    private fun createColorPickerHBox(colors: List<Color>, parent: EventTarget): HBox {
-        return opcr(parent, hbox {
+    private fun createColorPickerHBox(colors: List<Color>, parent: EventTarget): Pane {
+        return opcr(parent,
             pane {
-                prefWidthProperty().bind(this@hbox.widthProperty())
                 paddingTop = 10.0
-                var counter: Double = 0.0
-                for (col in colors) {
-                    //val c = circle(0.0, primaryStage.height / 2 - 270 * sqrt((sin(PI / 5 * counter))), 40) {
-                    val c = circle(0.0, primaryStage.height / 2 - 270, 40) {
+                for ((i, col) in colors.withIndex()) {
+                    val c = circle(radius = 40) {
                         fill = col
-                        centerXProperty().bind(
-                            this@pane.widthProperty() / 2.0 - colors.size / 2.0 * 80 + 40 + counter * 80 - 50 * cos(
-                                PI / 5 * counter
-                            )
-                        )
+                        transforms.add(Affine().apply {
+                            val oofset = 170.0
+                            appendTranslation(0.0, -oofset)
+                            appendRotation(360.0 / colors.size * i, 0.0, oofset)
+                        })
+                        layoutXProperty().bind(this@pane.widthProperty() / 2)
+                        layoutYProperty().bind(this@pane.heightProperty() / 2)
                         onMouseClicked = EventHandler {
                             controller.chosenColorProperty.set(this.fill)
-                            this@hbox.visibleProperty().set(false)
+                            this@pane.isVisible = false
                         }
                     }
                     println(c)
-                    counter++
                 }
-                this@hbox.visibleProperty().set(false)
-            }
+                this@pane.isVisible = false
         })
     }
 }
