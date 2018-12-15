@@ -2,6 +2,7 @@ package client.ui
 
 import client.model.CommunicationManager
 import client.model.GameManager
+import common.Message
 import common.Player
 import common.SixSidedStarBoard
 import common.chinesecheckers.ChineseCheckersGame
@@ -32,6 +33,7 @@ class MenuViewController : Controller() {
             alignment = Pos.CENTER
             text("waiting for game") { addClass(Styles.label) }
         }
+        //client.addObserverFunction(this::serverReturnedGameHandler)
         thread {
             sleep(500)
             serverReturnedGameHandler(
@@ -47,19 +49,20 @@ class MenuViewController : Controller() {
     }
 
     fun playWithHumanPlayersClickHandler() {
-        view.replaceWith<AppGameView>()
         //TODO("not implemented")
     }
 
-    fun serverReturnedGameHandler(message: ChineseCheckersGameMessage) {
+    fun serverReturnedGameHandler(message: Message) {
         if (message is ChineseCheckersGameMessage.GameAssigned) {
             val gameManager: GameManager = GameManager(
                 Player(0, "ania4"),
                 message.game
 
             )
+            client.addObserverFunction(gameManager::onMessageReceived)
             runLater {
-                find<GameViewController>().initGameManager(gameManager)
+                find<GameViewController>().initClientAndGameManager(client, gameManager)
+                client.removeObserverFunction(this::serverReturnedGameHandler)
                 view.replaceWith<AppGameView>()
             }
         }

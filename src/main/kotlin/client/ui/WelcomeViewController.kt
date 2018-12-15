@@ -1,25 +1,27 @@
 package client.ui
 
 import client.model.CommunicationManager
+import common.Message
 import common.chinesecheckers.ChineseCheckersClientMessage
 import tornadofx.Controller
 import tornadofx.runLater
 
 class WelcomeViewController : Controller() {
     private val view: AppWelcomeView by inject()
-    private val manager: CommunicationManager = CommunicationManager()
+    private val client: CommunicationManager = CommunicationManager()
     fun connectButtonClickHandler() {
-        //manager.launch("localhost")
+        //client.launch("localhost")
         //for testing
-        find<MenuViewController>().initCommunicationManager(manager)
+        find<MenuViewController>().initCommunicationManager(client)
         view.replaceWith<AppMenuView>()
         //---
     }
 
-    fun connectionEstablishedHandler(message: ChineseCheckersClientMessage) {
+    fun connectionEstablishedHandler(message: Message) {
         if (message is ChineseCheckersClientMessage.ConnectionEstablished)
             runLater {
-                find<MenuViewController>().initCommunicationManager(manager)
+                find<MenuViewController>().initCommunicationManager(client)
+                client.removeObserverFunction(this::connectionEstablishedHandler)
                 view.replaceWith<AppMenuView>()
             }
     }
