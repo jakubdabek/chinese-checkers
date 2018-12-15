@@ -14,18 +14,18 @@ class CommunicationManager {
     lateinit var gameManager: GameManager
         private set
     private lateinit var thread: Thread
-    private val observersFunctions = mutableListOf<(Message) -> Unit>()
+    private val onMessageReceivedHandlers = mutableListOf<(Message) -> Unit>()
 
     fun addObserverFunction(function: (Message) -> Unit) {
-        observersFunctions.add(function)
+        onMessageReceivedHandlers.add(function)
     }
 
     fun removeObserverFunction(function: (Message) -> Unit) {
-        observersFunctions.remove(function)
+        onMessageReceivedHandlers.remove(function)
     }
 
     private fun notifyAllObservers(message: Message) {
-        for (func in observersFunctions) {
+        for (func in onMessageReceivedHandlers.toList()) {
             func.invoke(message)
         }
     }
