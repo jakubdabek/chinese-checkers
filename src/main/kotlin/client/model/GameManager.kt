@@ -4,7 +4,9 @@ import common.*
 import common.chinesecheckers.ChineseCheckersGame
 import common.chinesecheckers.ChineseCheckersGameMessage
 
-class GameManager(val player: Player, val game: ChineseCheckersGame) {
+class GameManager(val player: Player) {
+    lateinit var game: ChineseCheckersGame
+        private set
     val playerId = player.id
     var possibleMoves: List<HexMove>? = null
     var leaderBoard: List<Player>? = null
@@ -32,15 +34,14 @@ class GameManager(val player: Player, val game: ChineseCheckersGame) {
         //interpret mess
         //inform board view
         when (message) {
-            is ChineseCheckersGameMessage.GameAssigned,
+            is ChineseCheckersGameMessage.GameAssigned -> game = message.game
             is ChineseCheckersGameMessage.MoveRequested,
             is ChineseCheckersGameMessage.AvailableMovesRequested -> TODO("error")
             is ChineseCheckersGameMessage.GameStarted -> {
-                println(message.playerCorners)
                 game.corners.putAll(message.playerCorners)
                 onGameEvent(Event.GameStarted)
             }
-            is ChineseCheckersGameMessage.PlayerJoined -> {}//TODO()
+            is ChineseCheckersGameMessage.PlayerJoined -> game.players.add(message.player)
             is ChineseCheckersGameMessage.PlayerLeft -> TODO()
 
             is ChineseCheckersGameMessage.GameEnded -> {

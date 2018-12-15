@@ -32,7 +32,7 @@ class GameManager(
         game.players.add(player)
         if (game.players.size == maxPlayers) {
             prepareCorners()
-            onPlayerJoined(game.players.map { Response(ChineseCheckersGameMessage.GameStarted(game.corners), it) })
+            onPlayerJoined(game.players.map { Response(ChineseCheckersGameMessage.GameStarted(game.corners.toMap()), it) })
         }
     }
 

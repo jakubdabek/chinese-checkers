@@ -2,25 +2,35 @@ package client.ui
 
 import client.model.CommunicationManager
 import client.model.GameManager
+import common.chinesecheckers.ChineseCheckerServerMessage
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Pos
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
-import utility.*
 import tornadofx.*
 
 class GameViewController : Controller() {
     private lateinit var gameManager: GameManager
     private lateinit var boardViewAdapter: BoardViewAdapter
-    private lateinit var client: CommunicationManager
+    private var allowBots: Boolean? = null
+    internal lateinit var client: CommunicationManager
     private val view: AppGameView by inject()
     val availableColors =
         listOf<Color>(Color.RED, Color.GREEN, Color.YELLOW, Color.DARKVIOLET, Color.ORANGE, Color.DARKBLUE)
     val chosenColorProperty: SimpleObjectProperty<Paint> = SimpleObjectProperty(Color.DARKSLATEGREY)
-    val chosenColor by chosenColorProperty
+    private lateinit var numberOfPlayersChosen: List<Int>
 
 
-    internal fun initClientAndGameManager(client: CommunicationManager, gameManager: GameManager) {
+    internal fun initClientAndList(
+        client: CommunicationManager,
+        gameManager: GameManager,
+        list: List<Int>,
+        allowBots: Boolean
+    ) {
+        this.client = client
+        this.allowBots = allowBots
+        numberOfPlayersChosen = list
         chosenColorProperty.set(availableColors[0])
         gameManager.setMessageProducedHandler(client::sendMessageToServer)
         gameManager.setGameEventHandler(this::handleGameEvent)
@@ -32,7 +42,7 @@ class GameViewController : Controller() {
 
     private fun handleGameEvent(event: GameManager.Event) {
         when (event) {
-            GameManager.Event.GameStarted -> startGame()
+            GameManager.Event.GameStarted -> runLater { startGame() }
             GameManager.Event.TurnStarted -> TODO()
             GameManager.Event.AvailableMovesChanged -> TODO()
             GameManager.Event.GameEndedInterrupted -> TODO()
@@ -67,5 +77,17 @@ class GameViewController : Controller() {
         view.root.top.isVisible = true
         view.root.bottom.isVisible = true
         view.root.center = board
+    }
+
+    fun performReadyClicked() {
+        with(view) {
+            readyButton.isDisable = true
+            root.center = vbox {
+                alignment = Pos.CENTER
+                addClass(Styles.gamePanel)
+                text("waiting for other players to join game...") { addClass(Styles.label) }
+            }
+        }
+        client.sendMessageToServer(ChineseCheckerServerMessage.GameRequest(numberOfPlayersChosen, allowBots!!))
     }
 }

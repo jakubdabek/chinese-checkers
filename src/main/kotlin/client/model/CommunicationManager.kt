@@ -50,7 +50,7 @@ class CommunicationManager {
     }
 
     private fun onMessageReceived(connectionId: MessagingManager.Id, message: Message) {
-        println("on message received called")
+        println("on message received called $message")
         notifyAllObservers(message)
     }
 

@@ -3,16 +3,18 @@ package client.ui
 import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.geometry.Pos
+import javafx.scene.control.ToggleButton
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.transform.Affine
 import tornadofx.*
 
+
 class AppGameView : View("Chinese checkers") {
     private lateinit var controller: GameViewController
     private lateinit var footer: HBox
-    //private var chosenColor = Color.DARKSLATEGREY
+    internal lateinit var readyButton: ToggleButton
 
     init {
         controller = find()
@@ -67,12 +69,12 @@ class AppGameView : View("Chinese checkers") {
                     paddingRightProperty.bind(this@vbox.widthProperty() / 8)
                     paddingBottomProperty.bind(this@vbox.heightProperty() / 8)
                     text("READY") { addClass(Styles.label15) }
-                    togglebutton {
+                    readyButton = togglebutton {
                         isSelected = false
                         addClass(Styles.checkbox)
                         prefWidth = 30.0
                         prefHeight = 30.0
-                        action(controller::startGame)
+                        action(controller::performReadyClicked)
                     }
                 }
             }
@@ -97,7 +99,7 @@ class AppGameView : View("Chinese checkers") {
             pane {
                 paddingTop = 10.0
                 for ((i, col) in colors.withIndex()) {
-                    val c = circle(radius = 40) {
+                    circle(radius = 40) {
                         fill = col
                         transforms.add(Affine().apply {
                             val oofset = 170.0
@@ -111,7 +113,6 @@ class AppGameView : View("Chinese checkers") {
                             this@pane.isVisible = false
                         }
                     }
-                    println(c)
                 }
                 this@pane.isVisible = false
         })
