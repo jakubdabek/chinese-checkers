@@ -29,7 +29,9 @@ class CommunicationManager {
         try {
             while (true) {
                 try {
+                    logInfo("Listening for a new connection")
                     val newSocket = listener.accept()
+                    logInfo("Socket accepted")
                     val connection = MessagingManager(
                         Random.nextUniqueInt(connections.values.map { it.messagingManager.connectionId.value }),
                         newSocket.getInputStream(),
@@ -37,6 +39,7 @@ class CommunicationManager {
                         this::receiveMessage,
                         this::handleMessagingError
                     )
+                    logInfo("MessagingManager[${connection.connectionId.value}] created")
                     launchConnection(connection)
                 } catch (ex: IOException) {
                     logError("Error during establishing a connection", ex)
@@ -59,8 +62,9 @@ class CommunicationManager {
             }
             onNormalConnectionTermination(messagingManager.connectionId)
         }
-        connections[messagingManager.connectionId] = (Connection(player, messagingManager, t))
+        connections[messagingManager.connectionId] = Connection(player, messagingManager, t)
         t.start()
+        logInfo("Connection ${messagingManager.connectionId.value} started")
     }
 
     private fun onNormalConnectionTermination(connectionId: MessagingManager.Id) {
