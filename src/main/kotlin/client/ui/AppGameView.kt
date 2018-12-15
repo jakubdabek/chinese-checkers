@@ -108,7 +108,8 @@ class AppGameView : View("Chinese checkers") {
                 paddingTop = 10.0
                 var counter: Double = 0.0
                 for (col in colors) {
-                    val c = circle(0.0, primaryStage.height / 2 - 270 * sqrt((sin(PI / 5 * counter))), 40) {
+                    //val c = circle(0.0, primaryStage.height / 2 - 270 * sqrt((sin(PI / 5 * counter))), 40) {
+                    val c = circle(0.0, primaryStage.height / 2 - 270, 40) {
                         fill = col
                         centerXProperty().bind(
                             this@pane.widthProperty() / 2.0 - colors.size / 2.0 * 80 + 40 + counter * 80 - 50 * cos(

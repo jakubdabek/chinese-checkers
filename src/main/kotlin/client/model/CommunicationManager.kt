@@ -2,22 +2,9 @@ package client.model
 
 import common.Message
 import common.MessagingManager
-import common.chinesecheckers.ChineseCheckerServerMessage
-import common.chinesecheckers.ChineseCheckersGame
 import java.net.Socket
 import kotlin.concurrent.thread
 
-
-
-//val comms = CommunicationManager()
-//
-//fun main(args: Array<String>) {
-//    val t = thread {
-//        comms.launch("localhost")
-//    }
-//
-//    //comms.messagingManager...
-//}
 
 class CommunicationManager {
     val DEFAULT_PORT = 8888
@@ -27,6 +14,22 @@ class CommunicationManager {
     lateinit var gameManager: GameManager
         private set
     private lateinit var thread: Thread
+    private val observersFunctions = mutableListOf<(Message) -> Unit>()
+
+    fun addObserverFunction(function: (Message) -> Unit) {
+        observersFunctions.add(function)
+    }
+
+    fun removeObserverFunction(function: (Message) -> Unit) {
+        observersFunctions.remove(function)
+    }
+
+    private fun notifyAllObservers(message: Message) {
+        for (func in observersFunctions) {
+            func.invoke(message)
+        }
+    }
+
     fun launch(ip: String, port: Int = DEFAULT_PORT) {
         thread = thread {
             val socket = Socket(ip, port)
@@ -46,6 +49,10 @@ class CommunicationManager {
     }
 
     private fun onMessageReceived(connectionId: Int, message: Message) {
-        TODO("not implemented")
+        notifyAllObservers(message)
+    }
+
+    fun sendMessageToServer(message: Message) {
+        messagingManager.sendMessageAsync(message)
     }
 }
