@@ -4,29 +4,27 @@ import client.model.CommunicationManager
 import client.model.GameManager
 import common.Message
 import common.Player
-import common.SixSidedStarBoard
 import common.chinesecheckers.ChineseCheckerServerMessage
-import common.chinesecheckers.ChineseCheckersGame
 import common.chinesecheckers.ChineseCheckersGameMessage
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import tornadofx.Controller
 import tornadofx.runLater
 import tornadofx.*
-import java.lang.Thread.sleep
-import kotlin.concurrent.thread
 
 class MenuViewController : Controller() {
     private val view: AppMenuView by inject()
     private lateinit var client: CommunicationManager
+    private lateinit var player: Player
+    var numberOfPlayersChosenProperties =
+        listOf(2,3,4,6).map { it to SimpleBooleanProperty() }.toMap()
 
-
-    fun initCommunicationManager(manager: CommunicationManager) {
-        client = manager
+    fun initCommunicationManager(manager: CommunicationManager, player: Player) {
+        this.client = manager
+        this.player = player
     }
 
     fun playWithComputerClickHandler() {
-        //send game request
-        //wait for server to call handler when received game
         view.rootVBox.children.clear()
         view.rootVBox.vbox {
             fitToParentSize()
@@ -35,7 +33,8 @@ class MenuViewController : Controller() {
             text("waiting for game") { addClass(Styles.label) }
         }
         client.addObserverFunction(this::serverReturnedGameHandler)
-        client.sendMessageToServer(ChineseCheckerServerMessage.GameRequest(listOf(2),false))
+        val list = numberOfPlayersChosenProperties.filter { it.value.get() }.map { it.key }
+        client.sendMessageToServer(ChineseCheckerServerMessage.GameRequest(list,false))
 //        thread {
 //            sleep(500)
 //            serverReturnedGameHandler(
@@ -56,9 +55,8 @@ class MenuViewController : Controller() {
     fun serverReturnedGameHandler(message: Message) {
         if (message is ChineseCheckersGameMessage.GameAssigned) {
             val gameManager: GameManager = GameManager(
-                Player(0, "ania4"),
+                player,
                 message.game
-
             )
             client.addObserverFunction(gameManager::onMessageReceived)
             runLater {

@@ -27,7 +27,7 @@ class WelcomeViewController : Controller() {
         println("connectionEstablishedHandler called")
         if (message is ChineseCheckersClientMessage.ConnectionEstablished)
             runLater {
-                find<MenuViewController>().initCommunicationManager(client)
+                find<MenuViewController>().initCommunicationManager(client,message.player)
                 client.removeObserverFunction(this::connectionEstablishedHandler)
                 view.replaceWith<AppMenuView>()
             }

@@ -62,32 +62,24 @@ class AppMenuView : View("Chinese checkers") {
                         prefWidthProperty().bind(this@hbox.widthProperty() / 6)
 
                         text("Number of players") { addClass(Styles.label15) }
-                        hbox {
-                            alignment = Pos.BASELINE_CENTER
-                            spacing = 20.0
-                            text("2") { addClass(Styles.label15) }
-                            togglebutton {
-                                addClass(Styles.checkbox)
-                                prefWidth = 30.0
-                                prefHeight = 30.0
-                            }
+                        for ((k, v) in menuViewController.numberOfPlayersChosenProperties) {
+                            createHBoxForCheckBox(k, false, this@vbox)
                         }
-                        createHBoxForCheckBox("3", this@vbox)
-                        createHBoxForCheckBox("4", this@vbox)
-                        createHBoxForCheckBox("6", this@vbox)
+                        menuViewController.numberOfPlayersChosenProperties[2]!!.set(true)
                     }
                 }
             }
         }
     }
 
-    private fun createHBoxForCheckBox(str: String, parent: EventTarget): HBox {
+    private fun createHBoxForCheckBox(number: Int ,selected: Boolean, parent: EventTarget): HBox {
         return opcr(parent, hbox {
             alignment = Pos.BASELINE_CENTER
             spacing = 20.0
-            text(str) { addClass(Styles.label15) }
+            text(number.toString()) { addClass(Styles.label15) }
             togglebutton {
-                isSelected = false
+                isSelected = selected
+                menuViewController.numberOfPlayersChosenProperties[number]!!.bindBidirectional(selectedProperty())
                 addClass(Styles.checkbox)
                 prefWidth = 30.0
                 prefHeight = 30.0
