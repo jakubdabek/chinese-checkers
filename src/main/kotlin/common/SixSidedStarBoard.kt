@@ -1,6 +1,9 @@
 package common
 
-class SixSidedStarBoard(val innerHexagonSizeLength: Int) {
+import java.io.Serializable
+
+
+class SixSidedStarBoard(val innerHexagonSizeLength: Int) : Serializable {
     val fields: Map<HexCoord, Field>
     val conditions = mapOf(
         0 to { c: HexCoord -> c.z >=  innerHexagonSizeLength },
@@ -38,6 +41,6 @@ class SixSidedStarBoard(val innerHexagonSizeLength: Int) {
         }
     }
 
-    data class Piece(val cornerId: Int)
-    class Field(var piece: Piece? = null)
+    data class Piece(val cornerId: Int) : Serializable
+    class Field(var piece: Piece? = null) : Serializable
 }

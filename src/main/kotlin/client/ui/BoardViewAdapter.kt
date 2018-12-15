@@ -13,6 +13,7 @@ import javafx.scene.shape.Circle
 import tornadofx.*
 import kotlin.math.cos
 
+
 class BoardViewAdapter(
     val gameManager: GameManager,
     val availableColors: List<Color>,

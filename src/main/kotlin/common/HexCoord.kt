@@ -1,6 +1,9 @@
 package common
 
-data class HexCoord(val x: Int, val y: Int) {
+import java.io.Serializable
+
+
+data class HexCoord(val x: Int, val y: Int) : Serializable {
     val z = 0 - x - y
 
     constructor(x: Int, y: Int, z: Int) : this(x, y) {

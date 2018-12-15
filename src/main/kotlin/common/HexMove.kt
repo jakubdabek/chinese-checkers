@@ -1,6 +1,9 @@
 package common
 
-data class HexMove(val movements: List<Pair<HexCoord, HexCoord>>) {
+import java.io.Serializable
+
+
+data class HexMove(val movements: List<Pair<HexCoord, HexCoord>>) : Serializable {
     val origin = movements.first().first
     val destination = movements.last().second
 }
