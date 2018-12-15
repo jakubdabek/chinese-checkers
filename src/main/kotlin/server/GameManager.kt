@@ -30,6 +30,16 @@ class GameManager(
     private fun addPlayer(player: Player) {
         onPlayerJoined(game.players.map { Response(ChineseCheckersGameMessage.PlayerJoined(player), it) })
         game.players.add(player)
+        if (game.players.size == maxPlayers) {
+            prepareCorners()
+            onPlayerJoined(game.players.map { Response(ChineseCheckersGameMessage.GameStarted(game.corners), it) })
+        }
+    }
+
+    private fun prepareCorners() {
+        game.fillBoardCorners(
+            game.players.map { it.id }.zip(usableCorners[maxPlayers]!!).toMap()
+        )
     }
 
     fun handleGameMessage(message: ChineseCheckersGameMessage, sender: Player): List<Response> {
@@ -67,5 +77,14 @@ class GameManager(
         return position.neighbours.
             filter { game.board.fields[it]?.piece == null }.
             map { HexMove(listOf(position to it)) }
+    }
+
+    companion object {
+        val usableCorners = mapOf(
+            2 to listOf(0, 3),
+            3 to listOf(0, 2, 5),
+            4 to listOf(0, 1, 4, 5),
+            6 to (0..5).toList()
+        )
     }
 }
