@@ -9,7 +9,13 @@ class GameManager(val player: Player, val game: ChineseCheckersGame) {
     var possibleMoves: List<HexMove>? = null
     var leaderBoard: List<Player>? = null
     private var messageProducedHandler: ((Message) -> Unit)? = null
-    enum class Event { GameEndedInterrupted, GameEndedConcluded, TurnStarted, AvailableMovesChanged }
+    enum class Event {
+        GameStarted,
+        TurnStarted,
+        AvailableMovesChanged,
+        GameEndedInterrupted,
+        GameEndedConcluded,
+    }
     private var gameEventHandler: ((Event) -> Unit)? = null
 
     private fun onMessageProduced(message: Message) {
@@ -29,8 +35,12 @@ class GameManager(val player: Player, val game: ChineseCheckersGame) {
             is ChineseCheckersGameMessage.GameAssigned,
             is ChineseCheckersGameMessage.MoveRequested,
             is ChineseCheckersGameMessage.AvailableMovesRequested -> TODO("error")
-            is ChineseCheckersGameMessage.GameStarted -> TODO()
-            is ChineseCheckersGameMessage.PlayerJoined -> TODO()
+            is ChineseCheckersGameMessage.GameStarted -> {
+                println(message.playerCorners)
+                game.corners.putAll(message.playerCorners)
+                onGameEvent(Event.GameStarted)
+            }
+            is ChineseCheckersGameMessage.PlayerJoined -> {}//TODO()
             is ChineseCheckersGameMessage.PlayerLeft -> TODO()
 
             is ChineseCheckersGameMessage.GameEnded -> {

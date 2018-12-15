@@ -7,7 +7,7 @@ sealed class ChineseCheckersGameMessage : Message {
     data class GameAssigned(val game: ChineseCheckersGame) : ChineseCheckersGameMessage() {
         override val content = game
     }
-    data class GameStarted(val playerCorners: Map<Int, Int>) : ChineseCheckersGameMessage() {
+    data class GameStarted(val playerCorners: Map<Player.Id, Int>) : ChineseCheckersGameMessage() {
         override val content = playerCorners
     }
     data class PlayerJoined(val player: Player) : ChineseCheckersGameMessage() {
