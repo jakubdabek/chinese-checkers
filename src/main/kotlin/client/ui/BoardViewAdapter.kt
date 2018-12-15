@@ -24,6 +24,7 @@ class BoardViewAdapter(
     //val expectedNumberOfPlayers
     private val corners get() = gameManager.game.corners
     var chosenField: Pair<Circle, Color>? = null
+    var chosenFieldCoords: HexCoord? = null
     val highLightedCircles = mutableListOf<Circle>()
     val cornersAndColors = mutableMapOf<Int, Color>()
 
@@ -52,7 +53,7 @@ class BoardViewAdapter(
             value.piece?.let {
                 val pawn = Circle(15.0, cornersAndColors[it.cornerId])
                 setLocationOfCircle(pawn, key, pane)
-                pawn.setOnMouseClicked { event: MouseEvent -> fieldClickedHandler(pawn, value); event.consume() }
+                pawn.setOnMouseClicked { event: MouseEvent -> fieldClickedHandler(pawn, value,key); event.consume() }
                 pane.add(pawn)
             }
 
@@ -81,19 +82,27 @@ class BoardViewAdapter(
         }
     }
 
-    private fun fieldClickedHandler(node: Node, field: common.SixSidedStarBoard.Field) {
+    private fun fieldClickedHandler(node: Node, field: common.SixSidedStarBoard.Field,coords: HexCoord) {
         if (node is Circle) {
             emptyClickedHandler()
             chosenField = null
+            chosenFieldCoords = null
             field.piece?.let {
                 chosenField = Pair(node, node.fill as Color)
+                chosenFieldCoords = coords
                 node.style(append = true) {
                     strokeWidth = 5.px
                     stroke = c("black")
                     fill = (node.fill as Color).deriveColor(0.0, 1.0, 1.5, 1.0)
                 }
+                gameManager.requestMoves(coords)
+            } ?: run {
+                //TODO: make move or not, add HexMove
             }
             println(field.toString())
         }
+    }
+    fun redrawBoard() {
+
     }
 }
