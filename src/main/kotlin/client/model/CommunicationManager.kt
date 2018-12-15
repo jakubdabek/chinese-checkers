@@ -45,10 +45,12 @@ class CommunicationManager {
     }
 
     private fun onError(connectionId: MessagingManager.Id, ex: Exception?, fatal: Boolean): Boolean {
-        TODO("not implemented")
+        ex?.printStackTrace()
+        return false
     }
 
     private fun onMessageReceived(connectionId: MessagingManager.Id, message: Message) {
+        println("on message received called")
         notifyAllObservers(message)
     }
 

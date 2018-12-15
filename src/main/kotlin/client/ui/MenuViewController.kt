@@ -5,6 +5,7 @@ import client.model.GameManager
 import common.Message
 import common.Player
 import common.SixSidedStarBoard
+import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersGame
 import common.chinesecheckers.ChineseCheckersGameMessage
 import javafx.geometry.Pos
@@ -33,19 +34,19 @@ class MenuViewController : Controller() {
             alignment = Pos.CENTER
             text("waiting for game") { addClass(Styles.label) }
         }
-        //client.addObserverFunction(this::serverReturnedGameHandler)
-        thread {
-            sleep(500)
-            serverReturnedGameHandler(
-                ChineseCheckersGameMessage.GameAssigned(
-                    ChineseCheckersGame(
-                        SixSidedStarBoard(5),
-                        mutableListOf(Player(0, "ania4"), Player(1, "zosia34"))
-                    )
-                )
-            )
-        }
-        //TODO("not implemented")
+        client.addObserverFunction(this::serverReturnedGameHandler)
+        client.sendMessageToServer(ChineseCheckerServerMessage.GameRequest(listOf(2),false))
+//        thread {
+//            sleep(500)
+//            serverReturnedGameHandler(
+//                ChineseCheckersGameMessage.GameAssigned(
+//                    ChineseCheckersGame(
+//                        SixSidedStarBoard(5),
+//                        mutableListOf(Player(0, "ania4"), Player(1, "zosia34"))
+//                    )
+//                )
+//            )
+//        }
     }
 
     fun playWithHumanPlayersClickHandler() {
