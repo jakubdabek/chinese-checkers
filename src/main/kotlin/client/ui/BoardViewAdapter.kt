@@ -130,7 +130,7 @@ class BoardViewAdapter(
         path.elements.addAll(move.movements.map {
             MoveTo(fieldCircles.getValue(it.second).centerX, fieldCircles.getValue(it.second).centerY)
         })
-        val pathTransition = PathTransition(Duration(500.0),path,chosenField!!.first)
+        val pathTransition = PathTransition(Duration(500.0),path, fieldCircles.getValue(move.origin))
         pathTransition.play()
         emptyClickedHandler()
     }
