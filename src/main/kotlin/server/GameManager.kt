@@ -78,8 +78,10 @@ class GameManager(
         listOf(Response(message, sender))
 
     private fun checkMove(move: HexMove, sender: Player): Boolean {
-        return ruleset.checkMove(game.board, move) &&
-                game.board.fields[move.origin]!!.piece!!.cornerId == game.corners[sender.id]
+        val ret = ruleset.checkMove(game.board, move)
+        val allMoves = ruleset.getPossibleMoves(game.board, move.origin)
+        println("move: $move, all moves: $allMoves, move in all moves: ${move in allMoves}, compare: $ret")
+        return ret && game.board.fields[move.origin]!!.piece!!.cornerId == game.corners[sender.id]
     }
 
     private fun checkAvailableMoves(position: HexCoord): List<HexMove> {

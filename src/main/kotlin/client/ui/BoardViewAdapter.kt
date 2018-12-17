@@ -128,14 +128,16 @@ class BoardViewAdapter(
     }
 
     fun performMove(move: HexMove) {
-        val path = Path()
-        path.elements.addAll(move.movements.map {
-            MoveTo(fieldCircles.getValue(it.second).translateX, fieldCircles.getValue(it.second).translateY)
-        })
+//        val path = Path()
+//        path.elements.addAll(move.movements.map {
+//            MoveTo(fieldCircles.getValue(it.second).translateX, fieldCircles.getValue(it.second).translateY)
+//        })
         val movedPawn = pawns.first { it.position == move.origin }
-        val pathTransition = PathTransition(Duration(500.0), path, movedPawn.circle)
+//        val pathTransition = PathTransition(Duration(500.0), path, movedPawn.circle)
         movedPawn.position = move.destination
-        pathTransition.play()
+        movedPawn.circle.translateX = fieldCircles.getValue(move.destination).translateX
+        movedPawn.circle.translateY = fieldCircles.getValue(move.destination).translateY
+//        pathTransition.play()
         emptyClickedHandler()
     }
 }
