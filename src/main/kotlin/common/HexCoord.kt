@@ -14,15 +14,24 @@ data class HexCoord(val x: Int, val y: Int) : Serializable {
     fun move(x: Int = 0, y: Int = 0, z: Int = 0) =
         HexCoord(this.x + x, this.y + y, this.z + z)
 
+    operator fun plus(other: HexCoord) =
+        HexCoord(x + other.x, y + other.y, z + other.z)
+
     override fun toString() = "HexCoord(x=$x, y=$y, z=$z)"
+
+    companion object {
+        val directions
+            get() = listOf(
+                HexCoord(-1,  0),
+                HexCoord( 1,  0),
+                HexCoord(-1, -1),
+                HexCoord( 1, -1),
+                HexCoord(-1,  1),
+                HexCoord( 1,  1)
+            )
+    }
 }
 
+
 val HexCoord.neighbours
-    get() = listOf(
-        HexCoord(x - 1, y),
-        HexCoord(x + 1, y),
-        HexCoord(x - 1, y - 1),
-        HexCoord(x + 1, y - 1),
-        HexCoord(x - 1, y + 1),
-        HexCoord(x + 1, y + 1)
-    )
+    get() = HexCoord.directions.map { this + it }

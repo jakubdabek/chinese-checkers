@@ -44,3 +44,8 @@ class SixSidedStarBoard(val innerHexagonSizeLength: Int) : Serializable {
     data class Piece(val cornerId: Int) : Serializable
     class Field(var piece: Piece? = null) : Serializable
 }
+
+fun SixSidedStarBoard.fieldEmpty(pos: HexCoord) =
+    fields[pos]?.let { it.piece == null } ?: false
+fun SixSidedStarBoard.fieldTaken(pos: HexCoord) =
+    fields[pos]?.let { it.piece != null } ?: false
