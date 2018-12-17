@@ -74,9 +74,9 @@ class GameManager(
     }
 
     private fun checkAvailableMoves(position: HexCoord): List<HexMove> {
-        return position.neighbours.
-            filter { game.board.fields[it]?.piece == null }.
-            map { HexMove(listOf(position to it)) }
+        return position.neighbours
+            .filter { pos -> game.board.fields[pos]?.let { it.piece == null } ?: false }
+            .map { HexMove(listOf(position to it)) }
     }
 
     companion object {
