@@ -6,7 +6,6 @@ import common.HexMove
 import common.Player
 import javafx.animation.PathTransition
 import javafx.beans.property.ObjectProperty
-import javafx.scene.Node
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
@@ -14,7 +13,6 @@ import javafx.scene.paint.Paint
 import javafx.scene.shape.Circle
 import javafx.scene.shape.MoveTo
 import javafx.scene.shape.Path
-import javafx.scene.shape.PathElement
 import javafx.util.Duration
 import tornadofx.*
 import kotlin.math.cos
@@ -26,11 +24,11 @@ class BoardViewAdapter(
     val chosenColor: ObjectProperty<Paint>
 ) {
     private val fields get() = gameManager.game.board.fields
-    private val fieldCircles = mutableMapOf<HexCoord,Circle>()
+    private lateinit var fieldCircles: Map<HexCoord,Circle>
     private val players get() = gameManager.game.players
     val currentNumberOfPlayers get() = gameManager.game.players.count()
     private val corners get() = gameManager.game.corners
-    var chosenField: Pair<Circle, Color>? = null
+    private var chosenPawn: Pawn? = null
     var chosenFieldCoords: HexCoord? = null
     val highlightedCircles = mutableListOf<Circle>()
     val cornersAndColors = mutableMapOf<Int, Color>()
@@ -50,62 +48,66 @@ class BoardViewAdapter(
         println(cornersAndColors)
     }
 
+    private data class Pawn(var position: HexCoord, val circle: Circle, val color: Color)
+    private val pawns = mutableListOf<Pawn>()
     fun getBoard(playerId: Player.Id): Pane {
         val pane = Pane()
-        fieldCircles.clear()
-        for ((key, value) in fields) {
+        val circles = mutableMapOf<HexCoord, Circle>()
+        pawns.clear()
+        for ((position, field) in fields) {
             val c = Circle(15.0, c("603BB7"))
-            setLocationOfCircle(c, key, pane)
-            //c.setOnMouseClicked { event: MouseEvent -> onFieldClickedHandler(c,value); event.consume() }
-            c.setOnMouseClicked { event: MouseEvent -> println(key.toString()) }
-            fieldCircles[key] = c
+            setLocationOfCircle(c, position, pane)
+            //c.setOnMouseClicked { event: MouseEvent -> onFieldClickedHandler(c,field); event.consume() }
+            c.setOnMouseClicked { println(position.toString()) }
+            circles[position] = c
             pane.add(c)
-            value.piece?.let {
-                val pawn = Circle(15.0, cornersAndColors[it.cornerId])
-                setLocationOfCircle(pawn, key, pane)
-                pawn.setOnMouseClicked { event: MouseEvent -> fieldClickedHandler(pawn, value,key); event.consume() }
-                pane.add(pawn)
+            field.piece?.let {
+                val color = cornersAndColors.getValue(it.cornerId)
+                val pawnCircle = Circle(15.0, color)
+                val pawn = Pawn(position, pawnCircle, color)
+                setLocationOfCircle(pawnCircle, position, pane)
+                pane.add(pawnCircle)
+                pawns.add(pawn)
+                pawnCircle.setOnMouseClicked { event: MouseEvent -> pawnClickedHandler(pawn, field); event.consume() }
             }
-
         }
+        fieldCircles = circles
         pane.setOnMouseClicked { emptyClickedHandler() }
         return pane
     }
 
     private fun setLocationOfCircle(c: Circle, hexCoord: HexCoord, parent: Pane) {
-        c.centerXProperty().bind(parent.widthProperty() / 2)
-        c.centerYProperty().bind(parent.heightProperty() / 2)
-        c.translateY = -0.5* (hexCoord.x + hexCoord.y) * 54
+        c.layoutXProperty().bind(parent.widthProperty() / 2)
+        c.layoutYProperty().bind(parent.heightProperty() / 2)
+        c.translateY = -0.5 * (hexCoord.x + hexCoord.y) * 54
         c.translateX = -hexCoord.x * 17 * cos(60.0) + hexCoord.y * 17 * cos(60.0)
     }
 
     private fun emptyClickedHandler() {
-        chosenField?.let { (circle, color) -> circle.style { circle.fill = color } }
+        chosenPawn?.let { (_, circle, color) -> circle.style { circle.fill = color } }
         for (c in highlightedCircles) {
             c.style { c.fill = c("603BB7") }
         }
     }
 
-    private fun fieldClickedHandler(node: Node, field: common.SixSidedStarBoard.Field,coords: HexCoord) {
-        if (node is Circle) {
-            emptyClickedHandler()
-            chosenField = null
-            chosenFieldCoords = null
-            field.piece?.let {
-                chosenField = Pair(node, node.fill as Color)
-                chosenFieldCoords = coords
-                node.style(append = true) {
-                    strokeWidth = 5.px
-                    stroke = c("black")
-                    fill = (node.fill as Color).deriveColor(0.0, 1.0, 1.5, 1.0)
-                }
-                gameManager.requestAvailableMoves(coords)
-            } ?: run {
-                //TODO: make move or not, add HexMove
+    private fun pawnClickedHandler(pawn: Pawn, field: common.SixSidedStarBoard.Field) {
+        emptyClickedHandler()
+        chosenPawn = null
+        chosenFieldCoords = null
+        field.piece?.let {
+            chosenPawn = pawn
+            pawn.circle.style(append = true) {
+                strokeWidth = 5.px
+                stroke = c("black")
+                fill = (pawn.circle.fill as Color).deriveColor(0.0, 1.0, 1.5, 1.0)
             }
-            println(field.toString())
+            gameManager.requestAvailableMoves(pawn.position)
+        } ?: run {
+            //TODO: make move or not, add HexMove
         }
+        println(field.toString())
     }
+
     fun redrawBoard() {
 
     }
@@ -118,19 +120,21 @@ class BoardViewAdapter(
     }
 
     fun highlightPossibleMoves() {
-        gameManager.possibleMoves?.map { fieldCircles.getValue(it.destination) to it }?.forEach {
-            highlightedCircles.add(it.first)
-            highlightCircle(it.first)
-            it.first.setOnMouseClicked { event -> gameManager.requestMove(it.second) }
+        gameManager.possibleMoves?.map { fieldCircles.getValue(it.destination) to it }?.forEach { (circle, move) ->
+            highlightedCircles.add(circle)
+            highlightCircle(circle)
+            circle.setOnMouseClicked { gameManager.requestMove(move) }
         }
     }
 
     fun performMove(move: HexMove) {
         val path = Path()
         path.elements.addAll(move.movements.map {
-            MoveTo(fieldCircles.getValue(it.second).centerX, fieldCircles.getValue(it.second).centerY)
+            MoveTo(fieldCircles.getValue(it.second).translateX, fieldCircles.getValue(it.second).translateY)
         })
-        val pathTransition = PathTransition(Duration(500.0),path, fieldCircles.getValue(move.origin))
+        val movedPawn = pawns.first { it.position == move.origin }
+        val pathTransition = PathTransition(Duration(500.0), path, movedPawn.circle)
+        movedPawn.position = move.destination
         pathTransition.play()
         emptyClickedHandler()
     }
