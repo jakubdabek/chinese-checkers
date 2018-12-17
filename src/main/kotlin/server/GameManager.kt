@@ -3,6 +3,7 @@ package server
 import common.*
 import common.chinesecheckers.ChineseCheckersGame
 import common.chinesecheckers.ChineseCheckersGameMessage
+import common.chinesecheckers.buildRuleset
 
 
 class GameManager(
@@ -58,6 +59,13 @@ class GameManager(
                 respond(ChineseCheckersGameMessage.AvailableMoves(checkAvailableMoves(message.position)), sender)
             is ChineseCheckersGameMessage.MoveRequested ->
                 if (checkMove(message.move, sender)) {
+                    game.board.run {
+                        message.move.let {
+                            val piece = fields[it.destination]!!.piece
+                            fields[it.destination]!!.piece = fields[it.origin]!!.piece
+                            fields[it.origin]!!.piece = piece
+                        }
+                    }
                     game.players.map { Response(ChineseCheckersGameMessage.MoveDone(message.move), it) }
                 } else {
                     respond(ChineseCheckersGameMessage.MoveRejected, sender)
@@ -68,15 +76,14 @@ class GameManager(
 
     private fun respond(message: ChineseCheckersGameMessage, sender: Player) =
         listOf(Response(message, sender))
+
     private fun checkMove(move: HexMove, sender: Player): Boolean {
-        return move in checkAvailableMoves(move.origin) &&
+        return ruleset.checkMove(game.board, move) &&
                 game.board.fields[move.origin]!!.piece!!.cornerId == game.corners[sender.id]
     }
 
     private fun checkAvailableMoves(position: HexCoord): List<HexMove> {
-        return position.neighbours
-            .filter { pos -> game.board.fields[pos]?.let { it.piece == null } ?: false }
-            .map { HexMove(listOf(position to it)) }
+        return ruleset.getPossibleMoves(game.board, position)
     }
 
     companion object {
@@ -86,5 +93,58 @@ class GameManager(
             4 to listOf(0, 1, 4, 5),
             6 to (0..5).toList()
         )
+
+        val ruleset = buildRuleset {
+            // move to adjacent field
+            addMovementRule { board, position ->
+                position.neighbours
+                .filter { pos -> board.fieldEmpty(pos) }
+                .map { HexMove(listOf(position to it)) }
+            }
+
+            // move with jump
+            addMovementRule { board, position ->
+                val moves = mutableListOf<HexMove>()
+                fun dfs(current: HexCoord, visited: MutableList<HexCoord>) {
+                    for (dir in HexCoord.directions) {
+                        val adjacent = current + dir
+                        if (board.fieldTaken(adjacent)) {
+                            val dest = adjacent + dir
+                            if (board.fieldEmpty(dest) && dest !in visited) {
+                                visited.add(dest)
+                                // val move1 = HexMove(visited zip visited.drop(1))
+                                // val move2 = HexMove(visited.asSequence().let { it zip it.drop(1) }.toList())
+                                // val move3 = HexMove(visited.windowed(2, 1) { it.first() to it.last() })
+                                val move = HexMove(visited.zipWithNext())
+                                moves.add(move)
+                                dfs(dest, visited)
+                                visited.removeAt(visited.size - 1)
+                            }
+                        }
+                    }
+                }
+                dfs(position, mutableListOf(position))
+                moves
+            }
+
+            addGameEndRule { game ->
+                val leaderboard = mutableListOf<Player>()
+                for (corner in game.corners) {
+                    if (game.board.fields
+                            .filter { it.value.piece?.cornerId == corner.value }
+                            .all { game.board.conditions[(corner.value + 3) % 6]!!.invoke(it.key) }
+                    ) {
+                        val playerId = game.corners.entries.first { it.value == corner.value }.key
+                        val player = game.players.first { it.id == playerId }
+                        leaderboard.add(0, player)
+                    }
+                }
+
+                if (leaderboard.size > 0)
+                    GameResult.Ended(leaderboard)
+                else
+                    null
+            }
+        }
     }
 }
