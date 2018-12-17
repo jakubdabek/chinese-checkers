@@ -24,10 +24,10 @@ data class HexCoord(val x: Int, val y: Int) : Serializable {
             get() = listOf(
                 HexCoord(-1,  0),
                 HexCoord( 1,  0),
-                HexCoord(-1, -1),
-                HexCoord( 1, -1),
                 HexCoord(-1,  1),
-                HexCoord( 1,  1)
+                HexCoord( 1, -1),
+                HexCoord( 0,  1),
+                HexCoord( 0, -1)
             )
     }
 }
