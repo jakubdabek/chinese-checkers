@@ -10,7 +10,7 @@ class RuleSet(private val rules: List<Rule>) {
     fun checkMove(board: SixSidedStarBoard, move: HexMove) =
         rules.asSequence()
             .filterIsInstance<MovementRule>()
-            .all { it.validateMove(board, move) }
+            .any { it.validateMove(board, move) }
 
     fun getPossibleMoves(board: SixSidedStarBoard, position: HexCoord) =
         rules.asSequence()
