@@ -2,6 +2,7 @@ package client.model
 
 import common.Message
 import common.MessagingManager
+import java.io.InterruptedIOException
 import java.net.Socket
 import kotlin.concurrent.thread
 
@@ -32,16 +33,27 @@ class CommunicationManager {
 
     fun launch(ip: String, port: Int = DEFAULT_PORT) {
         thread = thread {
-            val socket = Socket(ip, port)
-            messagingManager = MessagingManager(
-                CONNECTION_ID,
-                socket.getInputStream(),
-                socket.getOutputStream(),
-                this::onMessageReceived,
-                this::onError
-            )
-            messagingManager.launch()
+            try {
+                val socket = Socket(ip, port)
+                messagingManager = MessagingManager(
+                    CONNECTION_ID,
+                    socket.getInputStream(),
+                    socket.getOutputStream(),
+                    this::onMessageReceived,
+                    this::onError
+                )
+                messagingManager.use { it.launch() }
+            } catch (ex: InterruptedException) {
+            } catch (ex: InterruptedIOException) {
+            } catch (ex: Exception) {
+                System.err.println("Messaging manager erred")
+                ex.printStackTrace()
+            }
         }
+    }
+
+    fun close() {
+        thread.interrupt()
     }
 
     private fun onError(connectionId: MessagingManager.Id, ex: Exception?, fatal: Boolean): Boolean {

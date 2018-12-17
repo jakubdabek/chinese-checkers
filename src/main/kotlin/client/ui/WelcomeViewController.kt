@@ -4,6 +4,7 @@ import client.model.CommunicationManager
 import common.Message
 import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersClientMessage
+import javafx.event.EventHandler
 import tornadofx.Controller
 import tornadofx.runLater
 import java.lang.Thread.sleep
@@ -14,6 +15,7 @@ class WelcomeViewController : Controller() {
     fun connectButtonClickHandler() {
         client.addObserverFunction(this::connectionEstablishedHandler)
         client.launch("localhost")
+        primaryStage.onCloseRequest = EventHandler { client.close() }
         sleep(1000)
         client.sendMessageToServer(ChineseCheckerServerMessage.ConnectionRequest("1"))
 
