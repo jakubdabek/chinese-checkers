@@ -2,7 +2,9 @@ package client.ui
 
 import client.model.GameManager
 import common.HexCoord
+import common.HexMove
 import common.Player
+import javafx.animation.PathTransition
 import javafx.beans.property.ObjectProperty
 import javafx.scene.Node
 import javafx.scene.input.MouseEvent
@@ -10,6 +12,10 @@ import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.shape.Circle
+import javafx.scene.shape.MoveTo
+import javafx.scene.shape.Path
+import javafx.scene.shape.PathElement
+import javafx.util.Duration
 import tornadofx.*
 import kotlin.math.cos
 
@@ -20,13 +26,13 @@ class BoardViewAdapter(
     val chosenColor: ObjectProperty<Paint>
 ) {
     private val fields get() = gameManager.game.board.fields
+    private val fieldCircles = mutableMapOf<HexCoord,Circle>()
     private val players get() = gameManager.game.players
     val currentNumberOfPlayers get() = gameManager.game.players.count()
-    //val expectedNumberOfPlayers
     private val corners get() = gameManager.game.corners
     var chosenField: Pair<Circle, Color>? = null
     var chosenFieldCoords: HexCoord? = null
-    val highLightedCircles = mutableListOf<Circle>()
+    val highlightedCircles = mutableListOf<Circle>()
     val cornersAndColors = mutableMapOf<Int, Color>()
 
     init {
@@ -46,10 +52,13 @@ class BoardViewAdapter(
 
     fun getBoard(playerId: Player.Id): Pane {
         val pane = Pane()
+        fieldCircles.clear()
         for ((key, value) in fields) {
             val c = Circle(15.0, c("603BB7"))
             setLocationOfCircle(c, key, pane)
             //c.setOnMouseClicked { event: MouseEvent -> onFieldClickedHandler(c,value); event.consume() }
+            c.setOnMouseClicked { event: MouseEvent -> println(key.toString()) }
+            fieldCircles[key] = c
             pane.add(c)
             value.piece?.let {
                 val pawn = Circle(15.0, cornersAndColors[it.cornerId])
@@ -66,19 +75,13 @@ class BoardViewAdapter(
     private fun setLocationOfCircle(c: Circle, hexCoord: HexCoord, parent: Pane) {
         c.centerXProperty().bind(parent.widthProperty() / 2)
         c.centerYProperty().bind(parent.heightProperty() / 2)
-        c.translateY = -hexCoord.z * 29.0
-        c.translateX = hexCoord.x * 17 * cos(60.0) - hexCoord.y * 17 * cos(60.0)
+        c.translateY = -0.5* (hexCoord.x + hexCoord.y) * 54
+        c.translateX = -hexCoord.x * 17 * cos(60.0) + hexCoord.y * 17 * cos(60.0)
     }
 
     private fun emptyClickedHandler() {
-//        val pane = event.target as Pane
-//        pane.children.filterIsInstance<Circle>().forEach { c ->
-//            c.style {
-//                fill = c("603BB7")
-//            }
-//        }
         chosenField?.let { (circle, color) -> circle.style { circle.fill = color } }
-        for (c in highLightedCircles) {
+        for (c in highlightedCircles) {
             c.style { c.fill = c("603BB7") }
         }
     }
@@ -96,7 +99,7 @@ class BoardViewAdapter(
                     stroke = c("black")
                     fill = (node.fill as Color).deriveColor(0.0, 1.0, 1.5, 1.0)
                 }
-                gameManager.requestMoves(coords)
+                gameManager.requestAvailableMoves(coords)
             } ?: run {
                 //TODO: make move or not, add HexMove
             }
@@ -105,5 +108,30 @@ class BoardViewAdapter(
     }
     fun redrawBoard() {
 
+    }
+
+    fun highlightCircle(c: Circle) {
+        c.style(append = true) {
+            strokeWidth = 5.px
+            stroke = c("gray")
+        }
+    }
+
+    fun highlightPossibleMoves() {
+        gameManager.possibleMoves?.map { fieldCircles.getValue(it.destination) to it }?.forEach {
+            highlightedCircles.add(it.first)
+            highlightCircle(it.first)
+            it.first.setOnMouseClicked { event -> gameManager.requestMove(it.second) }
+        }
+    }
+
+    fun performMove(move: HexMove) {
+        val path = Path()
+        path.elements.addAll(move.movements.map {
+            MoveTo(fieldCircles.getValue(it.second).centerX, fieldCircles.getValue(it.second).centerY)
+        })
+        val pathTransition = PathTransition(Duration(500.0),path,chosenField!!.first)
+        pathTransition.play()
+        emptyClickedHandler()
     }
 }

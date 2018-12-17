@@ -2,7 +2,9 @@ package client.ui
 
 import client.model.CommunicationManager
 import client.model.GameManager
+import common.HexMove
 import common.chinesecheckers.ChineseCheckerServerMessage
+import common.chinesecheckers.ChineseCheckersGameMessage
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.Pane
@@ -44,9 +46,11 @@ class GameViewController : Controller() {
         when (event) {
             GameManager.Event.GameStarted -> runLater { startGame() }
             GameManager.Event.TurnStarted -> TODO()
-            GameManager.Event.AvailableMovesChanged -> TODO()
+            GameManager.Event.AvailableMovesChanged -> runLater { boardViewAdapter.highlightPossibleMoves() }
             GameManager.Event.GameEndedInterrupted -> TODO()
             GameManager.Event.GameEndedConcluded -> TODO()
+            GameManager.Event.PlayerLeft -> TODO()
+            GameManager.Event.MoveDone -> runLater { boardViewAdapter.performMove(gameManager.moveToBePerformed!!)}
         }
     }
 
@@ -77,6 +81,10 @@ class GameViewController : Controller() {
         view.root.top.isVisible = true
         view.root.bottom.isVisible = true
         view.root.center = board
+    }
+
+    fun makeMove(move: HexMove) {
+        client.sendMessageToServer(ChineseCheckersGameMessage.MoveRequested(move))
     }
 
     fun performReadyClicked() {

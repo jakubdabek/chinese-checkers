@@ -9,6 +9,7 @@ class GameManager(val player: Player) {
         private set
     val playerId = player.id
     var possibleMoves: List<HexMove>? = null
+    var moveToBePerformed: HexMove? = null
     var leaderBoard: List<Player>? = null
     private var messageProducedHandler: ((Message) -> Unit)? = null
     enum class Event {
@@ -17,6 +18,8 @@ class GameManager(val player: Player) {
         AvailableMovesChanged,
         GameEndedInterrupted,
         GameEndedConcluded,
+        PlayerLeft,
+        MoveDone
     }
     private var gameEventHandler: ((Event) -> Unit)? = null
 
@@ -37,12 +40,16 @@ class GameManager(val player: Player) {
             is ChineseCheckersGameMessage.GameAssigned -> game = message.game
             is ChineseCheckersGameMessage.MoveRequested,
             is ChineseCheckersGameMessage.AvailableMovesRequested -> TODO("error")
+            is ChineseCheckersGameMessage.MoveDone -> {
+                moveToBePerformed = message.move
+                onGameEvent(Event.MoveDone)
+            }
             is ChineseCheckersGameMessage.GameStarted -> {
                 game.corners.putAll(message.playerCorners)
                 onGameEvent(Event.GameStarted)
             }
             is ChineseCheckersGameMessage.PlayerJoined -> game.players.add(message.player)
-            is ChineseCheckersGameMessage.PlayerLeft -> TODO()
+            is ChineseCheckersGameMessage.PlayerLeft -> onGameEvent(Event.PlayerLeft)
 
             is ChineseCheckersGameMessage.GameEnded -> {
                 when (message.result) {
@@ -78,9 +85,14 @@ class GameManager(val player: Player) {
 
     }
 
-    fun requestMoves(coord: HexCoord) {
+    fun requestAvailableMoves(coord: HexCoord) {
         onMessageProduced(ChineseCheckersGameMessage.AvailableMovesRequested(coord))
     }
+
+    fun requestMove(move: HexMove) {
+        onMessageProduced(ChineseCheckersGameMessage.MoveRequested(move))
+    }
+
     fun pass() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }

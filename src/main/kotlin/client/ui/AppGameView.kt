@@ -40,9 +40,9 @@ class AppGameView : View("Chinese checkers") {
                     }
                     visibleProperty().set(false)
                     prefWidthProperty().bind(primaryStage.widthProperty())
-                    button("END TURN") { }
+                    button("END TURN") { action {controller.endTurn() } }
 
-                }
+                    }
             }
             center = vbox {
                 alignment = Pos.CENTER
