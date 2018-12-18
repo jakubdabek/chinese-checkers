@@ -45,6 +45,7 @@ class GameManager(
 
     fun handleGameMessage(message: ChineseCheckersGameMessage, sender: Player): List<Response> {
         return when (message) {
+            is ChineseCheckersGameMessage.TurnEnded,
             is ChineseCheckersGameMessage.GameAssigned,
             is ChineseCheckersGameMessage.TurnStarted,
             is ChineseCheckersGameMessage.GameStarted,
@@ -85,7 +86,7 @@ class GameManager(
     companion object {
         val usableCorners = mapOf(
             2 to listOf(0, 3),
-            3 to listOf(0, 2, 5),
+            3 to listOf(0, 2, 4),
             4 to listOf(0, 1, 4, 5),
             6 to (0..5).toList()
         )

@@ -35,6 +35,9 @@ sealed class ChineseCheckersGameMessage : Message {
     data class MoveDone(val move: HexMove): ChineseCheckersGameMessage() {
         override val content = move
     }
+    data class TurnEnded(val player: Player): ChineseCheckersGameMessage() {
+        override val content = player
+    }
     object MoveRejected: ChineseCheckersGameMessage() {
         override val content: Nothing? = null
         override fun equals(other: Any?) = other is MoveRejected
