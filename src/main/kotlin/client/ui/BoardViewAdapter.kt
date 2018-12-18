@@ -11,6 +11,7 @@ import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.shape.Circle
+import javafx.scene.shape.LineTo
 import javafx.scene.shape.MoveTo
 import javafx.scene.shape.Path
 import javafx.util.Duration
@@ -64,6 +65,7 @@ class BoardViewAdapter(
             field.piece?.let {
                 val color = cornersAndColors.getValue(it.cornerId)
                 val pawnCircle = Circle(15.0, color)
+                pawnCircle.viewOrder = -1.0
                 val pawn = Pawn(position, pawnCircle, color)
                 setLocationOfCircle(pawnCircle, position, pane)
                 pane.add(pawnCircle)
@@ -129,16 +131,17 @@ class BoardViewAdapter(
     }
 
     fun performMove(move: HexMove) {
-//        val path = Path()
-//        path.elements.addAll(move.movements.map {
-//            MoveTo(fieldCircles.getValue(it.second).translateX, fieldCircles.getValue(it.second).translateY)
-//        })
+        val path = Path()
         val movedPawn = pawns.first { it.position == move.origin }
-//        val pathTransition = PathTransition(Duration(500.0), path, movedPawn.circle)
+        path.elements.add(MoveTo(movedPawn.circle.translateX, movedPawn.circle.translateY))
+        path.elements.addAll(move.movements.map {
+            LineTo(fieldCircles.getValue(it.second).translateX, fieldCircles.getValue(it.second).translateY)
+        })
+        val pathTransition = PathTransition(Duration(400.0 * path.elements.size), path, movedPawn.circle)
         movedPawn.position = move.destination
-        movedPawn.circle.translateX = fieldCircles.getValue(move.destination).translateX
-        movedPawn.circle.translateY = fieldCircles.getValue(move.destination).translateY
-//        pathTransition.play()
+//        movedPawn.circle.translateX = fieldCircles.getValue(move.destination).translateX
+//        movedPawn.circle.translateY = fieldCircles.getValue(move.destination).translateY
+        pathTransition.play()
         emptyClickedHandler()
     }
 }
