@@ -77,6 +77,7 @@ class BoardViewAdapter(
         }
         fieldCircles = circles
         pane.setOnMouseClicked { emptyClickedHandler() }
+        pane.isDisable = true
         return pane
     }
 
@@ -147,8 +148,6 @@ class BoardViewAdapter(
         })
         val pathTransition = PathTransition(Duration(400.0 * path.elements.size), path, movedPawn.circle)
         movedPawn.position = move.destination
-//        movedPawn.circle.translateX = fieldCircles.getValue(move.destination).translateX
-//        movedPawn.circle.translateY = fieldCircles.getValue(move.destination).translateY
         pathTransition.play()
         emptyClickedHandler()
     }

@@ -45,7 +45,7 @@ class GameViewController : Controller() {
     private fun handleGameEvent(event: GameManager.Event) {
         when (event) {
             GameManager.Event.GameStarted -> runLater { startGame() }
-            GameManager.Event.TurnStarted -> TODO()
+            GameManager.Event.TurnStarted -> runLater { view.root.center.isDisable = false }
             GameManager.Event.AvailableMovesChanged -> runLater { boardViewAdapter.highlightPossibleMoves() }
             GameManager.Event.GameEndedInterrupted -> TODO()
             GameManager.Event.GameEndedConcluded -> TODO()
@@ -67,6 +67,7 @@ class GameViewController : Controller() {
         boardViewAdapter.chosenMove?.let {
             gameManager.endTurn(it)
         } ?: pass()
+        runLater { view.root.center.isDisable = true }
     }
 
     fun pass() {

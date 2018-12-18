@@ -92,11 +92,12 @@ class GameManager(val player: Player) {
     }
 
     fun pass() {
+        onMessageProduced(ChineseCheckersGameMessage.TurnEnded(player))
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     fun exitGame() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //onMessageProduced(ChineseCheckersGameMessage.GameEnded(GameResult.Interrupted))
     }
 
 }

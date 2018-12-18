@@ -35,12 +35,15 @@ class AppGameView : View("Chinese checkers") {
             addClass(Styles.gamePanel)
             top {
                 hbox {
-                    style {
-                        backgroundColor += c("black")
-                    }
+                    addClass(Styles.gamePanel)
+                    alignment = Pos.TOP_CENTER
+                    spacing = 150.0
                     visibleProperty().set(false)
                     prefWidthProperty().bind(primaryStage.widthProperty())
-                    button("END TURN") { action { controller.endTurn() } }
+                    prefHeight = 40.0
+                    button("EXIT GAME") { addClass(Styles.gameButton); action { controller.exitGame() } }
+                    button("END TURN") { addClass(Styles.gameButton); action { controller.endTurn() } }
+                    button("PASS") { addClass(Styles.gameButton); action { controller.pass() } }
 
                     }
             }
@@ -85,9 +88,7 @@ class AppGameView : View("Chinese checkers") {
                     pane {
                         prefWidthProperty().bind(primaryStage.widthProperty())
                         prefHeight = 25.0
-                        style {
-                            backgroundColor += c("black")
-                        }
+                        addClass(Styles.gamePanel)
                     }
                 }
             }

@@ -16,6 +16,7 @@ class Styles : Stylesheet() {
         val colorPicker by cssclass()
         val highlightedField by cssclass()
         val chosenAsDestination by cssclass()
+        val gameButton by cssclass()
     }
 
     init {
@@ -23,37 +24,39 @@ class Styles : Stylesheet() {
             prefWidth = 300.px
             fontSize = 23.px
             textFill = c("white")
-            backgroundColor += c("darkred")
+            backgroundColor += c("#5e5e5e")
             and(hover) {
-                backgroundColor += c("black")
-                textFill = c("pink")
+                backgroundColor += c("#6e6e6e")
             }
         }
         label {
             fontSize = 23.px
             fontFamily = Font.SANS_SERIF
+            fill = c("white")
         }
         mainVBox {
-            backgroundColor += c("lightgray")
+            backgroundColor += c("#272727")
         }
         gamePanel {
-            backgroundColor += c("lightgray")
+            backgroundColor += c("#272727" )
         }
         checkbox {
             fontSize = 15.px
             backgroundRadius = multi(box(15.px))
-            backgroundColor += c("red")
+            backgroundColor += c("darkred")
             and(selected) {
-                backgroundColor += c("green")
+                backgroundColor += c("darkgreen")
             }
         }
         label15 {
             fontSize = 15.px
             fontFamily = Font.SANS_SERIF
+            fill = c("white")
         }
         colorPicker {
             backgroundColor += c("transparent")
             fontSize = 10.px
+            textFill = c("white")
             colorLabelVisible = false
             arrowsVisible = false
         }
@@ -72,6 +75,15 @@ class Styles : Stylesheet() {
         chosenAsDestination {
             strokeWidth = 5.px
             stroke = c("yellow")
+        }
+        gameButton {
+            prefWidth = 100.px
+            fontSize = 15.px
+            textFill = c("white")
+            backgroundColor += c("#5e5e5e")
+            and(hover) {
+                backgroundColor += c("#7f7f7f")
+            }
         }
     }
 }

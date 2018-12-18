@@ -19,7 +19,7 @@ class AppWelcomeView : View("Chinese checkers") {
     private val welcomeViewController: WelcomeViewController by inject()
     private lateinit var rootVBox: VBox
     private lateinit var menuVBox: VBox
-    private lateinit var serverIPTextField: TextField
+    internal lateinit var serverIPTextField: TextField
     private lateinit var applyIPButton: Button
     override val root = with(this) {
         primaryStage.height = DEFAULT_HEIGHT
