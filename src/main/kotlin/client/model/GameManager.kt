@@ -79,11 +79,8 @@ class GameManager(val player: Player) {
         gameEventHandler = function
     }
 
-    fun endTurn(target: HexCoord?) {
-        target?.let {
-            //onMessageProduced(ChineseCheckersGameMessage.MoveRequested(HexMove(listOf(it))))
-        }
-
+    fun endTurn(move: HexMove) {
+        requestMove(move)
     }
 
     fun requestAvailableMoves(coord: HexCoord) {

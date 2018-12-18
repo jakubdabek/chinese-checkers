@@ -64,7 +64,9 @@ class GameViewController : Controller() {
     }
 
     fun endTurn() {
-        gameManager.endTurn(boardViewAdapter.chosenFieldCoords)
+        boardViewAdapter.chosenMove?.let {
+            gameManager.endTurn(it)
+        } ?: pass()
     }
 
     fun pass() {

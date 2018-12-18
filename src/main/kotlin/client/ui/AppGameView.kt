@@ -40,7 +40,7 @@ class AppGameView : View("Chinese checkers") {
                     }
                     visibleProperty().set(false)
                     prefWidthProperty().bind(primaryStage.widthProperty())
-                    button("END TURN") { action {controller.endTurn() } }
+                    button("END TURN") { action { controller.endTurn() } }
 
                     }
             }

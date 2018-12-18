@@ -30,7 +30,7 @@ class BoardViewAdapter(
     val currentNumberOfPlayers get() = gameManager.game.players.count()
     private val corners get() = gameManager.game.corners
     private var chosenPawn: Pawn? = null
-    var chosenFieldCoords: HexCoord? = null
+    var chosenMove: HexMove? = null
     val highlightedCircles = mutableListOf<Circle>()
     val cornersAndColors = mutableMapOf<Int, Color>()
 
@@ -56,7 +56,8 @@ class BoardViewAdapter(
         val circles = mutableMapOf<HexCoord, Circle>()
         pawns.clear()
         for ((position, field) in fields) {
-            val c = Circle(15.0, c("603BB7"))
+            val c = Circle(15.0)
+            c.addClass(Styles.unselectedField)
             setLocationOfCircle(c, position, pane)
             //c.setOnMouseClicked { event: MouseEvent -> onFieldClickedHandler(c,field); event.consume() }
             c.setOnMouseClicked { println(position.toString()) }
@@ -87,9 +88,15 @@ class BoardViewAdapter(
     }
 
     private fun emptyClickedHandler() {
-        chosenPawn?.let { (_, circle, color) -> circle.style { circle.fill = color } }
+        println("empty clicked handler called")
+        chosenPawn?.let { (_, circle, _) -> circle.removeClass(Styles.selectedField) }
+        chosenPawn = null
+        chosenMove = null
         for (c in highlightedCircles) {
-            c.style { c.fill = c("603BB7") }
+            c.removeClass(Styles.highlightedField)
+            c.removeClass(Styles.chosenAsDestination)
+            c.addClass(Styles.unselectedField)
+            c.setOnMouseClicked { emptyClickedHandler(); it.consume() }
         }
         highlightedCircles.clear()
     }
@@ -97,17 +104,11 @@ class BoardViewAdapter(
     private fun pawnClickedHandler(pawn: Pawn, field: common.SixSidedStarBoard.Field) {
         emptyClickedHandler()
         chosenPawn = null
-        chosenFieldCoords = null
+        chosenMove = null
         field.piece?.let {
             chosenPawn = pawn
-            pawn.circle.style(append = true) {
-                strokeWidth = 5.px
-                stroke = c("black")
-                fill = (pawn.circle.fill as Color).deriveColor(0.0, 1.0, 1.5, 1.0)
-            }
+            pawn.circle.addClass(Styles.selectedField)
             gameManager.requestAvailableMoves(pawn.position)
-        } ?: run {
-            //TODO: make move or not, add HexMove
         }
     }
 
@@ -116,17 +117,24 @@ class BoardViewAdapter(
     }
 
     fun highlightCircle(c: Circle) {
-        c.style(append = true) {
-            strokeWidth = 5.px
-            stroke = c("gray")
-        }
+        c.addClass(Styles.highlightedField)
     }
 
     fun highlightPossibleMoves() {
         gameManager.possibleMoves?.map { fieldCircles.getValue(it.destination) to it }?.forEach { (circle, move) ->
             highlightedCircles.add(circle)
             highlightCircle(circle)
-            circle.setOnMouseClicked { gameManager.requestMove(move) }
+
+            circle.setOnMouseClicked { event ->
+                println("highlighted clicked")
+                chosenMove = move
+                for (highlightedCircle in highlightedCircles) {
+                    highlightedCircle.removeClass(Styles.chosenAsDestination)
+                                     //.addClass(Styles.highlightedField)
+                }
+                circle.addClass(Styles.chosenAsDestination)
+                event.consume()
+            }
         }
     }
 

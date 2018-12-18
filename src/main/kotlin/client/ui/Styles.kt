@@ -14,6 +14,8 @@ class Styles : Stylesheet() {
         val unselectedField by cssclass()
         val selectedField by cssclass()
         val colorPicker by cssclass()
+        val highlightedField by cssclass()
+        val chosenAsDestination by cssclass()
     }
 
     init {
@@ -54,7 +56,22 @@ class Styles : Stylesheet() {
             fontSize = 10.px
             colorLabelVisible = false
             arrowsVisible = false
-
+        }
+        selectedField {
+            strokeWidth = 5.px
+            stroke = c("black")
+        }
+        unselectedField {
+            fill = c("603BB7")
+        }
+        highlightedField {
+            fill = c("603BB7")
+            strokeWidth = 5.px
+            stroke = c("white")
+        }
+        chosenAsDestination {
+            strokeWidth = 5.px
+            stroke = c("yellow")
         }
     }
 }
