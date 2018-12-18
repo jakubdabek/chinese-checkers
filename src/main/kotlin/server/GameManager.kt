@@ -59,13 +59,7 @@ class GameManager(
                 respond(ChineseCheckersGameMessage.AvailableMoves(checkAvailableMoves(message.position)), sender)
             is ChineseCheckersGameMessage.MoveRequested ->
                 if (checkMove(message.move, sender)) {
-                    game.board.run {
-                        message.move.let {
-                            val piece = fields[it.destination]!!.piece
-                            fields[it.destination]!!.piece = fields[it.origin]!!.piece
-                            fields[it.origin]!!.piece = piece
-                        }
-                    }
+                    game.board.applyMove(message.move)
                     game.players.map { Response(ChineseCheckersGameMessage.MoveDone(message.move), it) }
                 } else {
                     respond(ChineseCheckersGameMessage.MoveRejected, sender)
