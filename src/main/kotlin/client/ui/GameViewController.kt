@@ -57,7 +57,7 @@ class GameViewController : Controller() {
     fun getBoard(): Pane {
         boardViewAdapter = BoardViewAdapter(gameManager, availableColors, chosenColorProperty)
         //gameManager.setMessageProducedHandler(boardViewAdapter::redrawBoard)
-        val pane = boardViewAdapter.getBoard(gameManager.playerId)
+        val pane = boardViewAdapter.getBoard()
         pane.prefWidthProperty().bind(view.root.widthProperty())
         pane.prefHeightProperty().bind(view.root.heightProperty())
         return pane

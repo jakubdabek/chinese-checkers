@@ -7,7 +7,7 @@ import common.chinesecheckers.ChineseCheckersGameMessage
 class GameManager(val player: Player) {
     lateinit var game: ChineseCheckersGame
         private set
-    val playerId = player.id
+    val playerId get() = player.id
     var possibleMoves: List<HexMove>? = null
     var moveToBePerformed: HexMove? = null
     var leaderBoard: List<Player>? = null
@@ -41,6 +41,7 @@ class GameManager(val player: Player) {
             is ChineseCheckersGameMessage.MoveRequested,
             is ChineseCheckersGameMessage.AvailableMovesRequested -> TODO("error")
             is ChineseCheckersGameMessage.MoveDone -> {
+                game.board.applyMove(message.move)
                 moveToBePerformed = message.move
                 onGameEvent(Event.MoveDone)
             }
@@ -100,4 +101,5 @@ class GameManager(val player: Player) {
     fun exitGame() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
 }

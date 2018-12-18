@@ -37,20 +37,20 @@ class BoardViewAdapter(
         gameManager.game.fillBoardCorners(corners)
         cornersAndColors.put(corners[gameManager.playerId]!!, chosenColor.get() as Color)
         for ((color, key) in
-        availableColors.filter { it != chosenColor.get() }
-                zip corners.filter { it.key != gameManager.playerId }.values
+            availableColors.filter { it != chosenColor.get() }
+            zip corners.filter { it.key != gameManager.playerId }.values
         ) {
             cornersAndColors[key] = color
 
         }
-        println(chosenColor)
-        println(corners)
-        println(cornersAndColors)
+//        println(chosenColor)
+//        println(corners)
+//        println(cornersAndColors)
     }
 
     private data class Pawn(var position: HexCoord, val circle: Circle, val color: Color)
     private val pawns = mutableListOf<Pawn>()
-    fun getBoard(playerId: Player.Id): Pane {
+    fun getBoard(): Pane {
         val pane = Pane()
         val circles = mutableMapOf<HexCoord, Circle>()
         pawns.clear()
@@ -68,7 +68,8 @@ class BoardViewAdapter(
                 setLocationOfCircle(pawnCircle, position, pane)
                 pane.add(pawnCircle)
                 pawns.add(pawn)
-                pawnCircle.setOnMouseClicked { event: MouseEvent -> pawnClickedHandler(pawn, field); event.consume() }
+                if (it.cornerId == corners.getValue(gameManager.playerId))
+                    pawnCircle.setOnMouseClicked { event: MouseEvent -> pawnClickedHandler(pawn, field); event.consume() }
             }
         }
         fieldCircles = circles
@@ -88,6 +89,7 @@ class BoardViewAdapter(
         for (c in highlightedCircles) {
             c.style { c.fill = c("603BB7") }
         }
+        highlightedCircles.clear()
     }
 
     private fun pawnClickedHandler(pawn: Pawn, field: common.SixSidedStarBoard.Field) {
@@ -105,7 +107,6 @@ class BoardViewAdapter(
         } ?: run {
             //TODO: make move or not, add HexMove
         }
-        println(field.toString())
     }
 
     fun redrawBoard() {
