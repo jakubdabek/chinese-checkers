@@ -5,19 +5,29 @@ import common.Message
 import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersClientMessage
 import javafx.event.EventHandler
+import javafx.scene.control.Alert
 import tornadofx.Controller
 import tornadofx.runLater
+import java.lang.Exception
 import java.lang.Thread.sleep
+import java.net.ConnectException
 
 class WelcomeViewController : Controller() {
     private val view: AppWelcomeView by inject()
     private val client: CommunicationManager = CommunicationManager()
     fun connectButtonClickHandler() {
         client.addObserverFunction(this::connectionEstablishedHandler)
-        client.launch("localhost")
-        primaryStage.onCloseRequest = EventHandler { client.close() }
-        sleep(1000)
-        client.sendMessageToServer(ChineseCheckerServerMessage.ConnectionRequest("1"))
+        try {
+            client.launch(view.serverIPTextField.text)
+            primaryStage.onCloseRequest = EventHandler { client.close() }
+            sleep(1000)
+            client.sendMessageToServer(ChineseCheckerServerMessage.ConnectionRequest("1"))
+        } catch (e: Exception) {
+            val errorWindow = Alert(Alert.AlertType.ERROR)
+            e.printStackTrace()
+            errorWindow.headerText = "Connection error.\nCheck if server ip is correct.\n" + e.message
+            errorWindow.showAndWait()
+        }
 
         //for testing
         //find<MenuViewController>().initCommunicationManager(client)
