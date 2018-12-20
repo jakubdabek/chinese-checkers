@@ -25,7 +25,11 @@ class WelcomeViewController : Controller() {
         } catch (e: Exception) {
             val errorWindow = Alert(Alert.AlertType.ERROR)
             e.printStackTrace()
-            errorWindow.headerText = "Connection error.\nCheck if server ip is correct.\n" + e.message
+            errorWindow.headerText = null
+            errorWindow.contentText = "Connection error.\nCheck if server ip is correct.\n" + e.message
+            //errorWindow.initOwner(view.currentWindow)
+            //errorWindow.dialogPane.children[1].style { fontSize = 12.px }
+            //errorWindow.dialogPane.children[2].style { maxWidth = 45.px ;fontSize = 12.px }
             errorWindow.showAndWait()
         }
 

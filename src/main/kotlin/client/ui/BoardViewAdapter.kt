@@ -23,7 +23,7 @@ class BoardViewAdapter(
     val chosenColor: ObjectProperty<Paint>
 ) {
     private val fields get() = gameManager.game.board.fields
-    private lateinit var fieldCircles: Map<HexCoord,Circle>
+    private lateinit var fieldCircles: Map<HexCoord, Circle>
     private val players get() = gameManager.game.players
     val currentNumberOfPlayers get() = gameManager.game.players.count()
     private val corners get() = gameManager.game.corners
@@ -36,8 +36,8 @@ class BoardViewAdapter(
         gameManager.game.fillBoardCorners(corners)
         cornersAndColors.put(corners[gameManager.playerId]!!, chosenColor.get() as Color)
         for ((color, key) in
-            availableColors.filter { it != chosenColor.get() }
-            zip corners.filter { it.key != gameManager.playerId }.values
+        availableColors.filter { it != chosenColor.get() }
+                zip corners.filter { it.key != gameManager.playerId }.values
         ) {
             cornersAndColors[key] = color
 
@@ -48,6 +48,7 @@ class BoardViewAdapter(
     }
 
     private data class Pawn(var position: HexCoord, val circle: Circle, val color: Color)
+
     private val pawns = mutableListOf<Pawn>()
     fun getBoard(): Pane {
         val pane = Pane()
@@ -115,8 +116,8 @@ class BoardViewAdapter(
         }
     }
 
-    fun redrawBoard() {
-
+    fun clearAllHighlights() {
+        emptyClickedHandler()
     }
 
     fun highlightCircle(c: Circle) {
@@ -133,7 +134,7 @@ class BoardViewAdapter(
                 chosenMove = move
                 for (highlightedCircle in highlightedCircles) {
                     highlightedCircle.removeClass(Styles.chosenAsDestination)
-                                     //.addClass(Styles.highlightedField)
+                    //.addClass(Styles.highlightedField)
                 }
                 circle.addClass(Styles.chosenAsDestination)
                 event.consume()
@@ -148,7 +149,7 @@ class BoardViewAdapter(
         path.elements.addAll(move.movements.map {
             LineTo(fieldCircles.getValue(it.second).translateX, fieldCircles.getValue(it.second).translateY)
         })
-        val pathTransition = PathTransition(Duration(400.0 * path.elements.size), path, movedPawn.circle)
+        val pathTransition = PathTransition(Duration(100.0 * path.elements.size), path, movedPawn.circle)
         movedPawn.position = move.destination
         pathTransition.play()
         emptyClickedHandler()

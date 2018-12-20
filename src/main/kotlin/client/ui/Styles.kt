@@ -5,6 +5,9 @@ import java.awt.Font
 
 class Styles : Stylesheet() {
     companion object {
+        val gamePanelColor = c("#272727" )
+        val lightenGamePanelColor = c("#5e5e5e")
+
         val button by cssclass()
         val label by cssclass()
         val label15 by cssclass()
@@ -17,6 +20,7 @@ class Styles : Stylesheet() {
         val highlightedField by cssclass()
         val chosenAsDestination by cssclass()
         val gameButton by cssclass()
+        val textfield by cssclass()
     }
 
     init {
@@ -24,7 +28,7 @@ class Styles : Stylesheet() {
             prefWidth = 300.px
             fontSize = 23.px
             textFill = c("white")
-            backgroundColor += c("#5e5e5e")
+            backgroundColor += lightenGamePanelColor
             and(hover) {
                 backgroundColor += c("#6e6e6e")
             }
@@ -35,10 +39,10 @@ class Styles : Stylesheet() {
             fill = c("white")
         }
         mainVBox {
-            backgroundColor += c("#272727")
+            backgroundColor += gamePanelColor
         }
         gamePanel {
-            backgroundColor += c("#272727" )
+            backgroundColor += gamePanelColor
         }
         checkbox {
             fontSize = 15.px
@@ -84,6 +88,12 @@ class Styles : Stylesheet() {
             and(hover) {
                 backgroundColor += c("#7f7f7f")
             }
+        }
+        textfield {
+            backgroundColor += lightenGamePanelColor
+            textFill = c("white")
+            fontSize = 15.px
+            accentColor = gamePanelColor
         }
     }
 }

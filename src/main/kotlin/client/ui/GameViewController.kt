@@ -45,12 +45,12 @@ class GameViewController : Controller() {
     private fun handleGameEvent(event: GameManager.Event) {
         when (event) {
             GameManager.Event.GameStarted -> runLater { startGame() }
-            GameManager.Event.TurnStarted -> runLater { view.root.center.isDisable = false }
+            GameManager.Event.TurnStarted -> runLater { enableControls() }
             GameManager.Event.AvailableMovesChanged -> runLater { boardViewAdapter.highlightPossibleMoves() }
             GameManager.Event.GameEndedInterrupted -> TODO()
             GameManager.Event.GameEndedConcluded -> TODO()
             GameManager.Event.PlayerLeft -> TODO()
-            GameManager.Event.MoveDone -> runLater { boardViewAdapter.performMove(gameManager.moveToBePerformed!!)}
+            GameManager.Event.MoveDone -> runLater { boardViewAdapter.performMove(gameManager.moveToBePerformed!!) }
         }
     }
 
@@ -67,11 +67,31 @@ class GameViewController : Controller() {
         boardViewAdapter.chosenMove?.let {
             gameManager.endTurn(it)
         } ?: pass()
-        runLater { view.root.center.isDisable = true }
+        disableControls()
     }
 
     fun pass() {
         gameManager.pass()
+        disableControls()
+    }
+
+    private fun disableControls() {
+        runLater {
+            view.root.center.isDisable = true
+            view.endTurnButton.isDisable = true
+            view.passButton.isDisable = true
+            view.endTurnButton.text = "WAITING"
+            boardViewAdapter.clearAllHighlights()
+        }
+    }
+
+    private fun enableControls() {
+        runLater {
+            view.root.center.isDisable = false
+            view.passButton.isDisable = false
+            view.endTurnButton.isDisable = false
+            view.endTurnButton.text = "END TURN"
+        }
     }
 
     fun exitGame() {

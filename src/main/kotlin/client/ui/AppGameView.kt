@@ -3,6 +3,7 @@ package client.ui
 import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.geometry.Pos
+import javafx.scene.control.Button
 import javafx.scene.control.ToggleButton
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
@@ -14,6 +15,8 @@ import tornadofx.*
 class AppGameView : View("Chinese checkers") {
     private lateinit var controller: GameViewController
     private lateinit var footer: HBox
+    internal lateinit var endTurnButton: Button
+    internal lateinit var passButton: Button
     internal lateinit var readyButton: ToggleButton
 
     init {
@@ -42,10 +45,21 @@ class AppGameView : View("Chinese checkers") {
                     prefWidthProperty().bind(primaryStage.widthProperty())
                     prefHeight = 40.0
                     button("EXIT GAME") { addClass(Styles.gameButton); action { controller.exitGame() } }
-                    button("END TURN") { addClass(Styles.gameButton); action { controller.endTurn() } }
-                    button("PASS") { addClass(Styles.gameButton); action { controller.pass() } }
-
+                    button("WAITING") {
+                        endTurnButton = this
+                        addClass(Styles.gameButton)
+                        action { controller.endTurn() }
+                        shortcut("Enter")
+                        isDisable = true
                     }
+                    button("PASS") {
+                        passButton = this
+                        addClass(Styles.gameButton)
+                        action { controller.pass() }
+                        isDisable = true
+                        shortcut("p")
+                    }
+                }
             }
             center = vbox {
                 alignment = Pos.CENTER
@@ -116,6 +130,6 @@ class AppGameView : View("Chinese checkers") {
                     }
                 }
                 this@pane.isVisible = false
-        })
+            })
     }
 }

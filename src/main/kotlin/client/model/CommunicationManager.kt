@@ -46,7 +46,7 @@ class CommunicationManager {
             } catch (ex: InterruptedException) {
             } catch (ex: InterruptedIOException) {
             } catch (ex: Exception) {
-                System.err.println("Messaging manager erred")
+                System.err.println("Messaging manager error")
                 ex.printStackTrace()
             }
         }
@@ -57,6 +57,7 @@ class CommunicationManager {
     }
 
     private fun onError(connectionId: MessagingManager.Id, ex: Exception?, fatal: Boolean): Boolean {
+        println("On error called")
         ex?.printStackTrace()
         return false
     }

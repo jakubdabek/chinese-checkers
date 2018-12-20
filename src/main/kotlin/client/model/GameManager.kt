@@ -12,6 +12,7 @@ class GameManager(val player: Player) {
     var moveToBePerformed: HexMove? = null
     var leaderBoard: List<Player>? = null
     private var messageProducedHandler: ((Message) -> Unit)? = null
+
     enum class Event {
         GameStarted,
         TurnStarted,
@@ -21,6 +22,7 @@ class GameManager(val player: Player) {
         PlayerLeft,
         MoveDone
     }
+
     private var gameEventHandler: ((Event) -> Unit)? = null
 
     private fun onMessageProduced(message: Message) {
@@ -93,7 +95,6 @@ class GameManager(val player: Player) {
 
     fun pass() {
         onMessageProduced(ChineseCheckersGameMessage.PlayerPassed)
-        TODO("not implemented")
     }
 
     fun exitGame() {

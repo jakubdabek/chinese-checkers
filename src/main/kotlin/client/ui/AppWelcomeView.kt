@@ -6,7 +6,10 @@ import javafx.scene.control.TextField
 import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.scene.media.Media
+import javafx.scene.media.MediaPlayer
 import tornadofx.*
+import java.io.File
 
 class AppWelcomeView : View("Chinese checkers") {
     companion object {
@@ -49,10 +52,12 @@ class AppWelcomeView : View("Chinese checkers") {
                         addClass(Styles.label)
                     }
                     textfield {
+                        addClass(Styles.textfield)
                         isFillWidth = false
-                        prefWidthProperty().bind(menuVBox.widthProperty() / 3)
+                        prefWidthProperty().bind(menuVBox.widthProperty() / 5)
                         text = "localhost"
                         serverIPTextField = this
+                        runLater {  positionCaret(text.length); selectAll(); }
                     }
                 }
                 button {
@@ -62,8 +67,24 @@ class AppWelcomeView : View("Chinese checkers") {
                     style(append = true) {
                         shortcut("Enter")
                     }
+                    //onMouseEntered = EventHandler { makeSound() }
+                }
+                button {
+                    text = "EXIT"
+                    action {
+                        primaryStage.close()
+                        this@AppWelcomeView.close()
+                    }
+                    //onMouseEntered = EventHandler { makeSound() }
                 }
             }
         }
+    }
+
+    private fun makeSound(): Unit {
+
+        val media = Media(File("src/main/resources/sound.mp3").toURI().toString())
+        val player: MediaPlayer = MediaPlayer( media)
+        player.play()
     }
 }
