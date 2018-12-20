@@ -3,10 +3,8 @@ package client.ui
 import client.model.GameManager
 import common.HexCoord
 import common.HexMove
-import common.Player
 import javafx.animation.PathTransition
 import javafx.beans.property.ObjectProperty
-import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
@@ -71,8 +69,12 @@ class BoardViewAdapter(
                 setLocationOfCircle(pawnCircle, position, pane)
                 pane.add(pawnCircle)
                 pawns.add(pawn)
-                if (it.cornerId == corners.getValue(gameManager.playerId))
-                    pawnCircle.setOnMouseClicked { event: MouseEvent -> pawnClickedHandler(pawn, field); event.consume() }
+                if (it.cornerId == corners.getValue(gameManager.playerId)) {
+                    pawnCircle.setOnMouseClicked { event ->
+                        pawnClickedHandler(pawn)
+                        event.consume()
+                    }
+                }
             }
         }
         fieldCircles = circles
@@ -102,11 +104,11 @@ class BoardViewAdapter(
         highlightedCircles.clear()
     }
 
-    private fun pawnClickedHandler(pawn: Pawn, field: common.SixSidedStarBoard.Field) {
+    private fun pawnClickedHandler(pawn: Pawn) {
         emptyClickedHandler()
         chosenPawn = null
         chosenMove = null
-        field.piece?.let {
+        fields[pawn.position]!!.piece?.let {
             chosenPawn = pawn
             pawn.circle.addClass(Styles.selectedField)
             gameManager.requestAvailableMoves(pawn.position)
