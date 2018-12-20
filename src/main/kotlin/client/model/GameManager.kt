@@ -53,7 +53,6 @@ class GameManager(val player: Player) {
             }
             is ChineseCheckersGameMessage.PlayerJoined -> game.players.add(message.player)
             is ChineseCheckersGameMessage.PlayerLeft -> onGameEvent(Event.PlayerLeft)
-
             is ChineseCheckersGameMessage.GameEnded -> {
                 when (message.result) {
                     is GameResult.Interrupted -> onGameEvent(Event.GameEndedInterrupted)

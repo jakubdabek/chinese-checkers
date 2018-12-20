@@ -1,5 +1,7 @@
 package client.ui
 
+import javafx.animation.Animation
+import javafx.animation.FadeTransition
 import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.geometry.Pos
@@ -9,12 +11,13 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.transform.Affine
+import javafx.util.Duration
 import tornadofx.*
 
 
 class AppGameView : View("Chinese checkers") {
     private lateinit var controller: GameViewController
-    private lateinit var footer: HBox
+    internal lateinit var footer: HBox
     internal lateinit var endTurnButton: Button
     internal lateinit var passButton: Button
     internal lateinit var readyButton: ToggleButton
@@ -97,13 +100,26 @@ class AppGameView : View("Chinese checkers") {
             }
             bottom {
                 hbox {
-                    visibleProperty().set(false)
+                    alignment = Pos.BOTTOM_CENTER
+                    //visibleProperty().set(false)
                     footer = this
-                    pane {
-                        prefWidthProperty().bind(primaryStage.widthProperty())
-                        prefHeight = 25.0
-                        addClass(Styles.gamePanel)
-                    }
+                    //pane {
+                        label("YOUR TOUR") {
+                            addClass(Styles.label15)
+                            style(append = true) { textFill = c("white") }
+                            val transition = FadeTransition(Duration(1000.0),this)
+                            transition.fromValue = 1.0
+                            transition.toValue = 0.1
+                            transition.cycleCount = Animation.INDEFINITE
+                            transition.isAutoReverse = true
+                            transition.play()
+                            footer.isVisible = false
+                        }
+
+                        //prefWidthProperty().bind(primaryStage.widthProperty())
+                        //prefHeight = 25.0
+                        //addClass(Styles.gamePanel)
+                    //}
                 }
             }
         }
