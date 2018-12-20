@@ -79,7 +79,7 @@ class GameManager(
                 } else {
                     respond(ChineseCheckersGameMessage.MoveRejected, sender)
                 }
-            is ChineseCheckersGameMessage.PlayerPassed -> listOf(
+            is ChineseCheckersGameMessage.PlayerPassed -> listOf( //TODO: check sender for current turn
                 usableCorners[maxPlayers]!!.let {
                     currentPlayerTurn = (currentPlayerTurn + 1) % it.size
                     Response(ChineseCheckersGameMessage.TurnStarted, getPlayerForCorner(it[currentPlayerTurn]))
