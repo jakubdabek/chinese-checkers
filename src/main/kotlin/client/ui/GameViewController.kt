@@ -81,6 +81,7 @@ class GameViewController : Controller() {
             view.endTurnButton.isDisable = true
             view.passButton.isDisable = true
             view.endTurnButton.text = "WAITING"
+            view.footer.isVisible = false
             boardViewAdapter.clearAllHighlights()
         }
     }
@@ -91,6 +92,7 @@ class GameViewController : Controller() {
             view.passButton.isDisable = false
             view.endTurnButton.isDisable = false
             view.endTurnButton.text = "END TURN"
+            view.footer.isVisible = true
         }
     }
 
@@ -102,7 +104,6 @@ class GameViewController : Controller() {
     fun startGame() {
         val board = getBoard()
         view.root.top.isVisible = true
-        view.root.bottom.isVisible = true
         view.root.center = board
     }
 
