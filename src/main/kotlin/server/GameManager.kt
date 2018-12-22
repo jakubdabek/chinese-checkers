@@ -30,6 +30,14 @@ class GameManager(
         return true
     }
 
+    fun tryAddBot(bot: Bot) : Boolean {
+        //TODO() check things?
+        if (game.players.size > maxPlayers)
+            return false
+        addPlayer(bot)
+        return true
+    }
+
     private fun getPlayerForCorner(corner: Int): Player =
         game.players.first { it.id == game.corners.entries.first { entry -> entry.value == corner }.key }
 

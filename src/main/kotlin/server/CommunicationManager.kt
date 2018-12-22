@@ -2,6 +2,7 @@ package server
 
 import common.Message
 import common.MessagingManager
+import common.SocketMessagingManager
 import common.Player
 import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersClientMessage
@@ -17,7 +18,7 @@ import kotlin.random.Random
 class CommunicationManager {
     private data class Connection(
         val player: Player,
-        val messagingManager: MessagingManager,
+        val MessagingManager: MessagingManager,
         val thread: Thread
     )
     private val connections = mutableMapOf<MessagingManager.Id, Connection>()
@@ -32,14 +33,14 @@ class CommunicationManager {
                     logInfo("Listening for a new connection")
                     val newSocket = listener.accept()
                     logInfo("Socket accepted")
-                    val connection = MessagingManager(
-                        Random.nextUniqueInt(connections.values.map { it.messagingManager.connectionId.value }),
+                    val connection = SocketMessagingManager(
+                        Random.nextUniqueInt(connections.values.map { it.MessagingManager.connectionId.value }),
                         newSocket.getInputStream(),
                         newSocket.getOutputStream(),
                         this::receiveMessage,
                         this::handleMessagingError
                     )
-                    logInfo("MessagingManager[${connection.connectionId.value}] created")
+                    logInfo("SocketMessagingManager[${connection.connectionId.value}] created")
                     launchConnection(connection)
                 } catch (ex: IOException) {
                     logError("Error during establishing a connection", ex)
@@ -116,16 +117,18 @@ class CommunicationManager {
             is ChineseCheckerServerMessage.ConnectionRequest -> {
                 if (checkHandshake(serverMessage.handshake)) {
                     val connection = connections[connectionId]!!
-                    connection.messagingManager.sendMessage(
+                    connection.MessagingManager.sendMessage(
                         ChineseCheckersClientMessage.ConnectionEstablished(connection.player))
                 }
             }
             is ChineseCheckerServerMessage.GameRequest -> {
                 val connection = connections[connectionId]!!
                 var assignedGame: GameManager? = null
-                for (game in games.values.toSet()) {
-                    if (game.tryAddPlayer(connection.player)) {
-                        assignedGame = game
+                if (!serverMessage.allowBots) {
+                    for (game in games.values.toSet()) {
+                        if (game.tryAddPlayer(connection.player)) {
+                            assignedGame = game
+                        }
                     }
                 }
                 if (assignedGame == null) {
@@ -138,9 +141,26 @@ class CommunicationManager {
                         throw Exception("Something went wrong")
                     }
                 }
+                if (serverMessage.allowBots) {
+                    for (i in 1..serverMessage.playersCount.first()) {
+                        val id = Random.nextUniqueInt(connections.values.map { it.MessagingManager.connectionId.value } )
+                        val botConnection = BotMessagingManager(
+                            id,
+                            this::receiveMessage,
+                            this::handleMessagingError,
+                            assignedGame
+                        )
+                        launchConnection(botConnection)
+                        val bot = Bot(id, "User#$id")
+                        if (!assignedGame.tryAddBot(bot)) {
+                            throw Exception("Something went wrong, error while adding bot")
+                        }
+                    }
+                }
                 games[connection.player.id] = assignedGame
-                connection.messagingManager.sendMessage(
-                    ChineseCheckersGameMessage.GameAssigned(assignedGame.game))
+                connection.MessagingManager.sendMessage(
+                    ChineseCheckersGameMessage.GameAssigned(assignedGame.game)
+                )
             }
         }
     }
@@ -148,7 +168,7 @@ class CommunicationManager {
     private fun sendResponses(responses: List<Response>) {
         for (response in responses) {
             val connection = connections.values.first { it.player == response.recipient }
-            connection.messagingManager.sendMessageAsync(response.message)
+            connection.MessagingManager.sendMessageAsync(response.message)
         }
     }
 

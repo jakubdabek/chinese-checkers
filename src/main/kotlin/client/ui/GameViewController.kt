@@ -66,8 +66,8 @@ class GameViewController : Controller() {
     fun endTurn() {
         boardViewAdapter.chosenMove?.let {
             gameManager.endTurn(it)
-        } ?: pass()
-        disableControls()
+            disableControls()
+        }
     }
 
     fun pass() {
