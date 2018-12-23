@@ -107,21 +107,21 @@ class CommunicationManager {
     }
 
     private fun handleGameMessage(connectionId: MessagingManager.Id, gameMessage: ChineseCheckersGameMessage) {
-        val connection = connections[connectionId]!!
-        sendResponses(games[connection.player.id]!!.handleGameMessage(gameMessage, connection.player))
+        val connection = connections.getValue(connectionId)
+        sendResponses(games.getValue(connection.player.id).handleGameMessage(gameMessage, connection.player))
     }
 
     private fun handleInternalMessage(connectionId: MessagingManager.Id, serverMessage: ChineseCheckerServerMessage) {
         when (serverMessage) {
             is ChineseCheckerServerMessage.ConnectionRequest -> {
                 if (checkHandshake(serverMessage.handshake)) {
-                    val connection = connections[connectionId]!!
+                    val connection = connections.getValue(connectionId)
                     connection.messagingManager.sendMessage(
                         ChineseCheckersClientMessage.ConnectionEstablished(connection.player))
                 }
             }
             is ChineseCheckerServerMessage.GameRequest -> {
-                val connection = connections[connectionId]!!
+                val connection = connections.getValue(connectionId)
                 var assignedGame: GameManager? = null
                 for (game in games.values.toSet()) {
                     if (game.tryAddPlayer(connection.player)) {

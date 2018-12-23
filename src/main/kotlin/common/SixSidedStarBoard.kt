@@ -42,9 +42,9 @@ class SixSidedStarBoard(val innerHexagonSizeLength: Int) : Serializable {
     }
 
     fun applyMove(move: HexMove) {
-        val piece = fields[move.destination]!!.piece
-        fields[move.destination]!!.piece = fields[move.origin]!!.piece
-        fields[move.origin]!!.piece = piece
+        val piece = fields.getValue(move.destination).piece
+        fields.getValue(move.destination).piece = fields.getValue(move.origin).piece
+        fields.getValue(move.origin).piece = piece
     }
 
     data class Piece(val cornerId: Int) : Serializable

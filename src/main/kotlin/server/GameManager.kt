@@ -38,7 +38,7 @@ class GameManager(
         game.players.add(player)
         if (game.players.size == maxPlayers) {
             prepareCorners()
-            val possibleCorners = usableCorners[maxPlayers]!!
+            val possibleCorners = usableCorners.getValue(maxPlayers)
             currentPlayerTurn = Random.nextInt(possibleCorners.size)
             onPlayerJoined(game.players.map { Response(ChineseCheckersGameMessage.GameStarted(game.corners.toMap()), it) })
             onPlayerJoined(listOf(
@@ -50,7 +50,7 @@ class GameManager(
 
     private fun prepareCorners() {
         game.fillBoardCorners(
-            game.players.map { it.id }.zip(usableCorners[maxPlayers]!!).toMap()
+            game.players.map { it.id }.zip(usableCorners.getValue(maxPlayers)).toMap()
         )
     }
 
@@ -72,7 +72,7 @@ class GameManager(
                 if (checkMove(message.move, sender)) {
                     game.board.applyMove(message.move)
                     game.players.map { Response(ChineseCheckersGameMessage.MoveDone(message.move), it) } +
-                    usableCorners[maxPlayers]!!.let {
+                    usableCorners.getValue(maxPlayers).let {
                         currentPlayerTurn = (currentPlayerTurn + 1) % it.size
                         Response(ChineseCheckersGameMessage.TurnStarted, getPlayerForCorner(it[currentPlayerTurn]))
                     }
@@ -80,7 +80,7 @@ class GameManager(
                     respond(ChineseCheckersGameMessage.MoveRejected, sender)
                 }
             is ChineseCheckersGameMessage.PlayerPassed -> listOf( //TODO: check sender for current turn
-                usableCorners[maxPlayers]!!.let {
+                usableCorners.getValue(maxPlayers).let {
                     currentPlayerTurn = (currentPlayerTurn + 1) % it.size
                     Response(ChineseCheckersGameMessage.TurnStarted, getPlayerForCorner(it[currentPlayerTurn]))
                 })
@@ -96,7 +96,7 @@ class GameManager(
         val ret = ruleset.checkMove(game.board, move)
         val allMoves = ruleset.getPossibleMoves(game.board, move.origin)
         println("move: $move, all moves: $allMoves, move in all moves: ${move in allMoves}, compare: $ret")
-        return ret && game.board.fields[move.origin]!!.piece!!.cornerId == game.corners[sender.id]
+        return ret && game.board.fields.getValue(move.origin).piece!!.cornerId == game.corners[sender.id]
     }
 
     private fun checkAvailableMoves(position: HexCoord): List<HexMove> {
@@ -149,7 +149,7 @@ class GameManager(
                 for (corner in game.corners) {
                     if (game.board.fields
                             .filter { it.value.piece?.cornerId == corner.value }
-                            .all { game.board.conditions[(corner.value + 3) % 6]!!.invoke(it.key) }
+                            .all { game.board.conditions.getValue((corner.value + 3) % 6).invoke(it.key) }
                     ) {
                         val playerId = game.corners.entries.first { it.value == corner.value }.key
                         val player = game.players.first { it.id == playerId }

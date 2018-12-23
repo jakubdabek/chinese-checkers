@@ -65,7 +65,7 @@ class AppMenuView : View("Chinese checkers") {
                         for ((k, v) in menuViewController.numberOfPlayersChosenProperties) {
                             createHBoxForCheckBox(k, false, this@vbox)
                         }
-                        menuViewController.numberOfPlayersChosenProperties[2]!!.set(true)
+                        menuViewController.numberOfPlayersChosenProperties.getValue(2).set(true)
                     }
                 }
             }
@@ -79,7 +79,7 @@ class AppMenuView : View("Chinese checkers") {
             text(number.toString()) { addClass(Styles.label15) }
             togglebutton {
                 isSelected = selected
-                menuViewController.numberOfPlayersChosenProperties[number]!!.bindBidirectional(selectedProperty())
+                menuViewController.numberOfPlayersChosenProperties.getValue(number).bindBidirectional(selectedProperty())
                 addClass(Styles.checkbox)
                 prefWidth = 30.0
                 prefHeight = 30.0

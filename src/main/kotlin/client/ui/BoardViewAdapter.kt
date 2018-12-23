@@ -34,7 +34,7 @@ class BoardViewAdapter(
 
     init {
         gameManager.game.fillBoardCorners(corners)
-        cornersAndColors.put(corners[gameManager.playerId]!!, chosenColor.get() as Color)
+        cornersAndColors.put(corners.getValue(gameManager.playerId), chosenColor.get() as Color)
         for ((color, key) in
         availableColors.filter { it != chosenColor.get() }
                 zip corners.filter { it.key != gameManager.playerId }.values
@@ -109,7 +109,7 @@ class BoardViewAdapter(
         emptyClickedHandler()
         chosenPawn = null
         chosenMove = null
-        fields[pawn.position]!!.piece?.let {
+        fields.getValue(pawn.position).piece?.let {
             chosenPawn = pawn
             pawn.circle.addClass(Styles.selectedField)
             gameManager.requestAvailableMoves(pawn.position)
