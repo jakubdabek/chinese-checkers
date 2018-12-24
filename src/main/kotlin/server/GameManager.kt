@@ -10,38 +10,41 @@ import kotlin.random.Random
 class GameManager(
     val maxPlayers: Int,
     val allowBots: Boolean,
-    private val onPlayerJoined: (List<Response>) -> Unit,
-    private val onPlayerLeft: (List<Response>) -> Unit
+    private val onEvent: (List<Response>) -> Unit
 ) {
-
-    constructor(
-        maxPlayers: Int,
-        allowBots: Boolean,
-        onPlayersChanged: (List<Response>) -> Unit
-    ) : this(maxPlayers, allowBots, onPlayersChanged, onPlayersChanged)
-
     val game: ChineseCheckersGame = ChineseCheckersGame(SixSidedStarBoard(5))
     var currentPlayerTurn: Int = -1
 
     fun tryAddPlayer(player: Player): Boolean {
-        if (game.players.size > maxPlayers || (allowBots && game.players.size > 0))
+        if (game.players.size >= maxPlayers || (allowBots && game.players.size > 0))
             return false
         addPlayer(player)
         return true
+    }
+
+    fun removePlayer(player: Player) {
+        if (player !in game.players)
+            return
+        if (game.players.size == maxPlayers) {
+            onEvent(game.players.map { Response(ChineseCheckersGameMessage.GameEnded(GameResult.Interrupted), it) })
+        } else {
+            game.players.remove(player)
+            onEvent(game.players.map { Response(ChineseCheckersGameMessage.PlayerLeft(player), it) })
+        }
     }
 
     private fun getPlayerForCorner(corner: Int): Player =
         game.players.first { it.id == game.corners.entries.first { entry -> entry.value == corner }.key }
 
     private fun addPlayer(player: Player) {
-        onPlayerJoined(game.players.map { Response(ChineseCheckersGameMessage.PlayerJoined(player), it) })
+        onEvent(game.players.map { Response(ChineseCheckersGameMessage.PlayerJoined(player), it) })
         game.players.add(player)
         if (game.players.size == maxPlayers) {
             prepareCorners()
             val possibleCorners = usableCorners.getValue(maxPlayers)
             currentPlayerTurn = Random.nextInt(possibleCorners.size)
-            onPlayerJoined(game.players.map { Response(ChineseCheckersGameMessage.GameStarted(game.corners.toMap()), it) })
-            onPlayerJoined(listOf(
+            onEvent(game.players.map { Response(ChineseCheckersGameMessage.GameStarted(game.corners.toMap()), it) })
+            onEvent(listOf(
                 Response(ChineseCheckersGameMessage.TurnStarted,
                 getPlayerForCorner(possibleCorners[currentPlayerTurn])
             )))
@@ -67,17 +70,28 @@ class GameManager(
             is ChineseCheckersGameMessage.AvailableMoves -> TODO("error")
 
             is ChineseCheckersGameMessage.AvailableMovesRequested ->
-                respond(ChineseCheckersGameMessage.AvailableMoves(checkAvailableMoves(message.position)), sender)
+                makeResponse(ChineseCheckersGameMessage.AvailableMoves(checkAvailableMoves(message.position)), sender)
             is ChineseCheckersGameMessage.MoveRequested ->
                 if (checkMove(message.move, sender)) {
                     game.board.applyMove(message.move)
-                    game.players.map { Response(ChineseCheckersGameMessage.MoveDone(message.move), it) } +
-                    usableCorners.getValue(maxPlayers).let {
-                        currentPlayerTurn = (currentPlayerTurn + 1) % it.size
-                        Response(ChineseCheckersGameMessage.TurnStarted, getPlayerForCorner(it[currentPlayerTurn]))
+                    val responses = game.players
+                        .map { Response(ChineseCheckersGameMessage.MoveDone(message.move), it) }
+                        .toMutableList()
+
+                    checkWinCondition()?.let { result ->
+                        responses.addAll(
+                            game.players
+                            .map { Response(ChineseCheckersGameMessage.GameEnded(result), it) }
+                        )
+                    } ?: run {
+                        responses.add(usableCorners.getValue(maxPlayers).let {
+                            currentPlayerTurn = (currentPlayerTurn + 1) % it.size
+                            Response(ChineseCheckersGameMessage.TurnStarted, getPlayerForCorner(it[currentPlayerTurn]))
+                        })
                     }
+                    responses
                 } else {
-                    respond(ChineseCheckersGameMessage.MoveRejected, sender)
+                    makeResponse(ChineseCheckersGameMessage.MoveRejected, sender)
                 }
             is ChineseCheckersGameMessage.PlayerPassed -> listOf( //TODO: check sender for current turn
                 usableCorners.getValue(maxPlayers).let {
@@ -89,7 +103,7 @@ class GameManager(
     }
 
 
-    private fun respond(message: ChineseCheckersGameMessage, sender: Player) =
+    private fun makeResponse(message: ChineseCheckersGameMessage, sender: Player) =
         listOf(Response(message, sender))
 
     private fun checkMove(move: HexMove, sender: Player): Boolean {
@@ -101,6 +115,10 @@ class GameManager(
 
     private fun checkAvailableMoves(position: HexCoord): List<HexMove> {
         return ruleset.getPossibleMoves(game.board, position)
+    }
+
+    private fun checkWinCondition(): GameResult? {
+        return ruleset.checkGameEnd(game)
     }
 
     companion object {

@@ -53,9 +53,11 @@ class CommunicationManager {
     private fun launchConnection(messagingManager: MessagingManager) {
         val id = Random.nextUniqueInt(connections.values.map { it.player.id.value })
         val player = Player(id, "User#$id")
-        val t = thread(false) {
+        val t = thread(start = false) {
             try {
                 messagingManager.use { it.launch() }
+            } catch (ex: InterruptedException) {
+            } catch (ex: InterruptedIOException) {
             } catch (ex: Exception) {
                 onErroneousConnectionTermination(messagingManager.connectionId, ex)
                 return@thread
@@ -69,10 +71,21 @@ class CommunicationManager {
 
     private fun onNormalConnectionTermination(connectionId: MessagingManager.Id) {
         logInfo("Connection ${connectionId.value} closed normally")
+        onConnectionTermination(connectionId)
     }
 
     private fun onErroneousConnectionTermination(connectionId: MessagingManager.Id, ex: Exception) {
         logError("Connection ${connectionId.value} terminated due to an error", ex)
+        onConnectionTermination(connectionId)
+    }
+
+    private fun onConnectionTermination(connectionId: MessagingManager.Id) {
+        leaveGame(connections.getValue(connectionId))
+        connections.remove(connectionId)
+    }
+
+    private fun leaveGame(connection: Connection) {
+        games[connection.player.id]?.removePlayer(connection.player)
     }
 
     private fun receiveMessage(connectionId: MessagingManager.Id, message: Message) {
@@ -108,7 +121,11 @@ class CommunicationManager {
 
     private fun handleGameMessage(connectionId: MessagingManager.Id, gameMessage: ChineseCheckersGameMessage) {
         val connection = connections.getValue(connectionId)
-        sendResponses(games.getValue(connection.player.id).handleGameMessage(gameMessage, connection.player))
+        games[connection.player.id]?.also {
+            sendResponses(it.handleGameMessage(gameMessage, connection.player))
+        } ?: run {
+            logError("Game message from ${connectionId.value} not handled, no active game assigned")
+        }
     }
 
     private fun handleInternalMessage(connectionId: MessagingManager.Id, serverMessage: ChineseCheckerServerMessage) {
@@ -122,25 +139,28 @@ class CommunicationManager {
             }
             is ChineseCheckerServerMessage.GameRequest -> {
                 val connection = connections.getValue(connectionId)
-                var assignedGame: GameManager? = null
-                for (game in games.values.toSet()) {
-                    if (game.tryAddPlayer(connection.player)) {
-                        assignedGame = game
+                if (connection.player.id !in games) {
+                    var assignedGame: GameManager? = null
+                    for (game in games.values.toSet()) {
+                        if (game.tryAddPlayer(connection.player)) {
+                            assignedGame = game
+                        }
                     }
-                }
-                if (assignedGame == null) {
-                    assignedGame = GameManager(
-                        serverMessage.playersCount.first(),
-                        serverMessage.allowBots,
-                        this::sendResponses
+                    if (assignedGame == null) {
+                        assignedGame = GameManager(
+                            serverMessage.playersCount.first(),
+                            serverMessage.allowBots,
+                            this::sendResponses
+                        )
+                        if (!assignedGame.tryAddPlayer(connection.player)) {
+                            throw Exception("Something went wrong")
+                        }
+                    }
+                    games[connection.player.id] = assignedGame
+                    connection.messagingManager.sendMessage(
+                        ChineseCheckersGameMessage.GameAssigned(assignedGame.game)
                     )
-                    if (!assignedGame.tryAddPlayer(connection.player)) {
-                        throw Exception("Something went wrong")
-                    }
-                }
-                games[connection.player.id] = assignedGame
-                connection.messagingManager.sendMessage(
-                    ChineseCheckersGameMessage.GameAssigned(assignedGame.game))
+                } //TODO: else send error?
             }
         }
     }
@@ -148,6 +168,9 @@ class CommunicationManager {
     private fun sendResponses(responses: List<Response>) {
         for (response in responses) {
             val connection = connections.values.first { it.player == response.recipient }
+            if (response.message is ChineseCheckersGameMessage.GameEnded) {
+                games.remove(connection.player.id)
+            }
             connection.messagingManager.sendMessageAsync(response.message)
         }
     }
