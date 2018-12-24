@@ -21,6 +21,7 @@ class CommunicationManager {
         val MessagingManager: MessagingManager,
         val thread: Thread
     )
+
     private val connections = mutableMapOf<MessagingManager.Id, Connection>()
     private val games = mutableMapOf<Player.Id, GameManager>()
 
@@ -63,6 +64,7 @@ class CommunicationManager {
             }
             onNormalConnectionTermination(messagingManager.connectionId)
         }
+        messagingManager.initPlayerID(player.id)
         connections[messagingManager.connectionId] = Connection(player, messagingManager, t)
         t.start()
         logInfo("Connection ${messagingManager.connectionId.value} started")
@@ -118,7 +120,8 @@ class CommunicationManager {
                 if (checkHandshake(serverMessage.handshake)) {
                     val connection = connections[connectionId]!!
                     connection.MessagingManager.sendMessage(
-                        ChineseCheckersClientMessage.ConnectionEstablished(connection.player))
+                        ChineseCheckersClientMessage.ConnectionEstablished(connection.player)
+                    )
                 }
             }
             is ChineseCheckerServerMessage.GameRequest -> {
@@ -142,8 +145,8 @@ class CommunicationManager {
                     }
                 }
                 if (serverMessage.allowBots) {
-                    for (i in 1..serverMessage.playersCount.first()) {
-                        val id = Random.nextUniqueInt(connections.values.map { it.MessagingManager.connectionId.value } )
+                    for (i in 0 until serverMessage.playersCount.first() - 1) {
+                        val id = Random.nextUniqueInt(connections.values.map { it.MessagingManager.connectionId.value })
                         val botConnection = BotMessagingManager(
                             id,
                             this::receiveMessage,
@@ -151,10 +154,10 @@ class CommunicationManager {
                             assignedGame
                         )
                         launchConnection(botConnection)
-                        val bot = Bot(id, "User#$id")
-                        if (!assignedGame.tryAddBot(bot)) {
+                        if (!assignedGame.tryAddBot(connections[botConnection.connectionId]!!.player)) {
                             throw Exception("Something went wrong, error while adding bot")
                         }
+                        games[botConnection.playerId] = assignedGame
                     }
                 }
                 games[connection.player.id] = assignedGame

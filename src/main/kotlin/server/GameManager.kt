@@ -30,8 +30,7 @@ class GameManager(
         return true
     }
 
-    fun tryAddBot(bot: Bot) : Boolean {
-        //TODO() check things?
+    fun tryAddBot(bot: Player) : Boolean {
         if (game.players.size > maxPlayers)
             return false
         addPlayer(bot)
