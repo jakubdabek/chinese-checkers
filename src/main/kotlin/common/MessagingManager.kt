@@ -1,19 +1,28 @@
 package common
 
-abstract class MessagingManager(connectionId: Int) : AutoCloseable {
+abstract class MessagingManager(
+    connectionId: Int,
+    onMessageReceived: (connectionId: Id, Message) -> Unit,
+    onError: (connectionId: Id, ex: Exception?, fatal: Boolean) -> Boolean
+) : AutoCloseable {
+
+    val connectionId = Id(connectionId)
+    protected val onMessageReceived: (Message) -> Unit =
+        { onMessageReceived(this.connectionId, it) }
+    protected val onError: (ex: Exception?, fatal: Boolean) -> Boolean =
+        { ex, fatal -> onError(this.connectionId, ex, fatal) }
+
     abstract fun launch()
     abstract fun sendMessage(message: Message)
-    abstract fun sendMessageAsync(message: Message)
+
     override fun hashCode() = connectionId.hashCode()
-    override fun equals(other: Any?) =
-        super.equals(other) || (other is SocketMessagingManager && connectionId == other.connectionId)
-
-    fun initPlayerID(id: Player.Id) {
-        playerId = id
+    override fun equals(other: Any?): Boolean {
+        if (super.equals(other))
+            return true
+        if (other is MessagingManager && other::class == this::class)
+            return connectionId == other.connectionId
+        return false
     }
-
-    internal lateinit var playerId: Player.Id
-    val connectionId = Id(connectionId)
 
     data class Id(val value: Int)
 }

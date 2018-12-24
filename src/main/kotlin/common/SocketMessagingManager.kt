@@ -12,13 +12,10 @@ class SocketMessagingManager(
     private val outputStream: OutputStream,
     onMessageReceived: (connectionId: Id, Message) -> Unit,
     onError: (connectionId: Id, ex: Exception?, fatal: Boolean) -> Boolean
-) : MessagingManager(connectionId) {
+) : MessagingManager(connectionId, onMessageReceived, onError) {
 
     private val objectOutput: ObjectOutputStream = ObjectOutputStream(outputStream)
     private val objectInput: ObjectInputStream = ObjectInputStream(inputStream)
-    private val onMessageReceived: (Message) -> Unit = { onMessageReceived(this.connectionId, it) }
-    private val onError: (ex: Exception?, fatal: Boolean) -> Boolean =
-        { ex, fatal -> onError(this.connectionId, ex, fatal) }
     private val queue: BlockingQueue<Message> = LinkedBlockingQueue<Message>()
 
     override fun launch() {
@@ -55,10 +52,6 @@ class SocketMessagingManager(
     }
 
     override fun sendMessage(message: Message) {
-        objectOutput.writeObject(message)
-    }
-
-    override fun sendMessageAsync(message: Message) {
         queue.put(message)
     }
 
@@ -67,11 +60,4 @@ class SocketMessagingManager(
         for (closeable in list)
             closeable.close()
     }
-
-    override fun equals(other: Any?) =
-        super.equals(other) || (other is SocketMessagingManager && connectionId == other.connectionId)
-
-    override fun hashCode() = connectionId.hashCode()
-
-
 }

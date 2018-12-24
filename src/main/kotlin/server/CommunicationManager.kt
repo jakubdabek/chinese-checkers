@@ -18,7 +18,7 @@ import kotlin.random.Random
 class CommunicationManager {
     private data class Connection(
         val player: Player,
-        val MessagingManager: MessagingManager,
+        val messagingManager: MessagingManager,
         val thread: Thread
     )
 
@@ -35,13 +35,13 @@ class CommunicationManager {
                     val newSocket = listener.accept()
                     logInfo("Socket accepted")
                     val connection = SocketMessagingManager(
-                        Random.nextUniqueInt(connections.values.map { it.MessagingManager.connectionId.value }),
+                        Random.nextUniqueInt(connections.values.map { it.messagingManager.connectionId.value }),
                         newSocket.getInputStream(),
                         newSocket.getOutputStream(),
                         this::receiveMessage,
                         this::handleMessagingError
                     )
-                    logInfo("SocketMessagingManager[${connection.connectionId.value}] created")
+                    logInfo("MessagingManager[${connection.connectionId.value}] created")
                     launchConnection(connection)
                 } catch (ex: IOException) {
                     logError("Error during establishing a connection", ex)
@@ -52,9 +52,11 @@ class CommunicationManager {
         }
     }
 
-    private fun launchConnection(messagingManager: MessagingManager) {
-        val id = Random.nextUniqueInt(connections.values.map { it.player.id.value })
-        val player = Player(id, "User#$id")
+    private fun launchConnection(messagingManager: MessagingManager, player: Player? = null) {
+        val _player = player ?: run {
+            val id = Random.nextUniqueInt(connections.values.map { it.player.id.value })
+            Player(id, "User#$id")
+        }
         val t = thread(false) {
             try {
                 messagingManager.use { it.launch() }
@@ -64,8 +66,7 @@ class CommunicationManager {
             }
             onNormalConnectionTermination(messagingManager.connectionId)
         }
-        messagingManager.initPlayerID(player.id)
-        connections[messagingManager.connectionId] = Connection(player, messagingManager, t)
+        connections[messagingManager.connectionId] = Connection(_player, messagingManager, t)
         t.start()
         logInfo("Connection ${messagingManager.connectionId.value} started")
     }
@@ -119,7 +120,7 @@ class CommunicationManager {
             is ChineseCheckerServerMessage.ConnectionRequest -> {
                 if (checkHandshake(serverMessage.handshake)) {
                     val connection = connections[connectionId]!!
-                    connection.MessagingManager.sendMessage(
+                    connection.messagingManager.sendMessage(
                         ChineseCheckersClientMessage.ConnectionEstablished(connection.player)
                     )
                 }
@@ -131,6 +132,7 @@ class CommunicationManager {
                     for (game in games.values.toSet()) {
                         if (game.tryAddPlayer(connection.player)) {
                             assignedGame = game
+                            break
                         }
                     }
                 }
@@ -145,23 +147,26 @@ class CommunicationManager {
                     }
                 }
                 if (serverMessage.allowBots) {
-                    for (i in 0 until serverMessage.playersCount.first() - 1) {
-                        val id = Random.nextUniqueInt(connections.values.map { it.MessagingManager.connectionId.value })
+                    repeat(serverMessage.playersCount.first() - 1) { _ ->
+                        val id = Random.nextUniqueInt(connections.values.map { it.messagingManager.connectionId.value })
+                        val playerId = Random.nextUniqueInt(connections.values.map { it.player.id.value })
+                        val botPlayer = Player(playerId, "Bot#$playerId")
                         val botConnection = BotMessagingManager(
                             id,
                             this::receiveMessage,
                             this::handleMessagingError,
-                            assignedGame
+                            botPlayer,
+                            assignedGame.game
                         )
-                        launchConnection(botConnection)
-                        if (!assignedGame.tryAddBot(connections[botConnection.connectionId]!!.player)) {
+                        launchConnection(botConnection, botPlayer)
+                        if (!assignedGame.tryAddBot(connections.getValue(botConnection.connectionId).player)) {
                             throw Exception("Something went wrong, error while adding bot")
                         }
-                        games[botConnection.playerId] = assignedGame
+                        games[botPlayer.id] = assignedGame
                     }
                 }
                 games[connection.player.id] = assignedGame
-                connection.MessagingManager.sendMessage(
+                connection.messagingManager.sendMessage(
                     ChineseCheckersGameMessage.GameAssigned(assignedGame.game)
                 )
             }
@@ -171,7 +176,7 @@ class CommunicationManager {
     private fun sendResponses(responses: List<Response>) {
         for (response in responses) {
             val connection = connections.values.first { it.player == response.recipient }
-            connection.MessagingManager.sendMessageAsync(response.message)
+            connection.messagingManager.sendMessage(response.message)
         }
     }
 
