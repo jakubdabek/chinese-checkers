@@ -17,7 +17,7 @@ dependencies {
     //testCompile group: 'junit', name: 'junit', version: '4.12'
     compile 'no.tornado:tornadofx:1.7.15'
 
-    def junitVersion="5.3"
+    def junitVersion="5.3.1"
     testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testCompile "org.junit.jupiter:junit-jupiter-params:$junitVersion"
 
