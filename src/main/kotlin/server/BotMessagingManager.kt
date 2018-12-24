@@ -1,12 +1,12 @@
 package server
 
-import common.Message
-import common.MessagingManager
-import common.chinesecheckers.ChineseCheckersGame
+import common.*
 import common.chinesecheckers.ChineseCheckersGameMessage
+import java.lang.Thread.sleep
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.TimeUnit
+import kotlin.math.abs
+import kotlin.random.Random
 
 class BotMessagingManager(
     connectionId: Int,
@@ -19,32 +19,71 @@ class BotMessagingManager(
     private val onError: (ex: Exception?, fatal: Boolean) -> Boolean =
         { ex, fatal -> onError(this.connectionId, ex, fatal) }
     private val queue: BlockingQueue<Message> = LinkedBlockingQueue<Message>()
+    private lateinit var rand: Random
 
 
     override fun close() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented")
     }
 
     override fun launch() {
+        rand = Random(playerId.value)
         while (true) {
-            val toSend = queue.poll(100, TimeUnit.MILLISECONDS) ?: continue
-            TODO() //handle message to send
+            println("bot ${playerId.value} working")
+            val toSend = queue.take() ?: continue
             processMessage(toSend)
-
         }
     }
 
     private fun processMessage(message: Message) {
         when (message) {
-            is ChineseCheckersGameMessage.GameStarted -> { TODO("check if should do sth") }
-            is ChineseCheckersGameMessage.TurnStarted -> { beginTour() }
-            is ChineseCheckersGameMessage.GameEnded -> { TODO() /*end game*/ }
-            is ChineseCheckersGameMessage.MoveDone -> {}
+            is ChineseCheckersGameMessage.GameAssigned -> { }
+            is ChineseCheckersGameMessage.GameStarted -> {
+                println("BOT RECEIVED GAME STARTED")
+                assignedGame.game.fillBoardCorners(message.playerCorners)
+            }
+            is ChineseCheckersGameMessage.AvailableMoves -> {
+                chooseAndRequestMove(message.moves)
+            }
+            is ChineseCheckersGameMessage.TurnStarted -> {
+                beginTurn()
+            }
+            is ChineseCheckersGameMessage.GameEnded -> {
+                TODO() /*end game*/
+            }
+            is ChineseCheckersGameMessage.MoveDone -> { }
         }
     }
 
-    private fun beginTour() {
+    private fun beginTurn() {
+        val board = assignedGame.game.board
+        val positionCoords = choosePawnToMove(board)
+        onMessageReceived(ChineseCheckersGameMessage.AvailableMovesRequested(positionCoords))
+    }
 
+    private fun choosePawnToMove(board: SixSidedStarBoard): HexCoord {
+        val botsCorner = assignedGame.game.corners[playerId]
+        val botsFields = board.fields.entries.filter { it.value.piece?.cornerId == botsCorner }
+        return botsFields[abs(rand.nextInt() % 10)].key
+        //TODO() //choose fields in a different way
+    }
+
+    private fun chooseAndRequestMove(hexMoves: List<HexMove>) {
+        if (hexMoves.isEmpty()) {
+            beginTurn()
+            return
+        }
+        //val chosenMove = hexMoves.sortedBy { -it.destination.z }.first()
+        val movesSortedByDirection = sortByDirection(hexMoves,assignedGame.game.corners.getValue(playerId),assignedGame.maxPlayers)
+        val chosenMove = movesSortedByDirection.first()
+        println("Chosen moves: $hexMoves and chosen move: $chosenMove")
+        sleep(500)
+        onMessageReceived(ChineseCheckersGameMessage.MoveRequested(chosenMove))
+    }
+
+    private fun sortByDirection(moves: List<HexMove>, corner: Int, numberOfPlayers: Int) : List<HexMove> {
+        //TODO() sort by direction
+        return moves.sortedBy { -it.destination.z }
     }
 
     override fun sendMessage(message: Message) {
