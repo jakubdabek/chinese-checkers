@@ -20,7 +20,8 @@ class GameManager(val player: Player) {
         GameEndedInterrupted,
         GameEndedConcluded,
         PlayerLeft,
-        MoveDone
+        MoveDone,
+        PlayerJoined
     }
 
     private var gameEventHandler: ((Event) -> Unit)? = null
@@ -51,7 +52,10 @@ class GameManager(val player: Player) {
                 game.corners.putAll(message.playerCorners)
                 onGameEvent(Event.GameStarted)
             }
-            is ChineseCheckersGameMessage.PlayerJoined -> game.players.add(message.player)
+            is ChineseCheckersGameMessage.PlayerJoined -> {
+                game.players.add(message.player)
+                onGameEvent(Event.PlayerJoined)
+            }
             is ChineseCheckersGameMessage.PlayerLeft -> onGameEvent(Event.PlayerLeft)
             is ChineseCheckersGameMessage.GameEnded -> {
                 when (message.result) {

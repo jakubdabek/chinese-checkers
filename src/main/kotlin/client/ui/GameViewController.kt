@@ -51,6 +51,7 @@ class GameViewController : Controller() {
             GameManager.Event.GameEndedConcluded -> TODO()
             GameManager.Event.PlayerLeft -> TODO()
             GameManager.Event.MoveDone -> runLater { boardViewAdapter.performMove(gameManager.moveToBePerformed!!) }
+            GameManager.Event.PlayerJoined -> { }
         }
     }
 
