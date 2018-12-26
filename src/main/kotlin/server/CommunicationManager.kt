@@ -21,6 +21,7 @@ class CommunicationManager {
         val messagingManager: MessagingManager,
         val thread: Thread
     )
+
     private val connections = mutableMapOf<MessagingManager.Id, Connection>()
     private val games = mutableMapOf<Player.Id, GameManager>()
 
@@ -51,9 +52,11 @@ class CommunicationManager {
         }
     }
 
-    private fun launchConnection(messagingManager: MessagingManager) {
-        val id = Random.nextUniqueInt(connections.values.map { it.player.id.value })
-        val player = Player(id, "User#$id")
+    private fun launchConnection(messagingManager: MessagingManager, player: Player? = null) {
+        val actualPlayer = player ?: run {
+            val id = Random.nextUniqueInt(connections.values.map { it.player.id.value })
+            Player(id, "User#$id")
+        }
         val t = thread(start = false) {
             try {
                 messagingManager.use { it.launch() }
@@ -65,7 +68,7 @@ class CommunicationManager {
             }
             onNormalConnectionTermination(messagingManager.connectionId)
         }
-        connections[messagingManager.connectionId] = Connection(player, messagingManager, t)
+        connections[messagingManager.connectionId] = Connection(actualPlayer, messagingManager, t)
         t.start()
         logInfo("Connection ${messagingManager.connectionId.value} started")
     }
