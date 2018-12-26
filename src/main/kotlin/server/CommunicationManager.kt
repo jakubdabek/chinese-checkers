@@ -146,6 +146,10 @@ class CommunicationManager {
                         throw Exception("Something went wrong")
                     }
                 }
+                games[connection.player.id] = assignedGame
+                connection.messagingManager.sendMessage(
+                    ChineseCheckersGameMessage.GameAssigned(assignedGame.game)
+                )
                 if (serverMessage.allowBots) {
                     repeat(serverMessage.playersCount.first() - 1) { _ ->
                         val id = Random.nextUniqueInt(connections.values.map { it.messagingManager.connectionId.value })
@@ -165,10 +169,6 @@ class CommunicationManager {
                         games[botPlayer.id] = assignedGame
                     }
                 }
-                games[connection.player.id] = assignedGame
-                connection.messagingManager.sendMessage(
-                    ChineseCheckersGameMessage.GameAssigned(assignedGame.game)
-                )
             }
         }
     }
