@@ -22,6 +22,11 @@ class GameManager(
         return true
     }
 
+    fun addBot(player: Player) {
+        assert(allowBots && game.players.size < maxPlayers) { "Bot added to invalid game" }
+        addPlayer(player)
+    }
+
     fun removePlayer(player: Player) {
         if (player !in game.players)
             return

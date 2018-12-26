@@ -137,17 +137,20 @@ class CommunicationManager {
                 if (checkHandshake(serverMessage.handshake)) {
                     val connection = connections.getValue(connectionId)
                     connection.messagingManager.sendMessage(
-                        ChineseCheckersClientMessage.ConnectionEstablished(connection.player))
+                        ChineseCheckersClientMessage.ConnectionEstablished(connection.player)
+                    )
                 }
             }
             is ChineseCheckerServerMessage.GameRequest -> {
                 val connection = connections.getValue(connectionId)
                 if (connection.player.id !in games) {
                     var assignedGame: GameManager? = null
-                    for (game in games.values.toSet()) {
-                        if (game.tryAddPlayer(connection.player)) {
-                            assignedGame = game
-                            break
+                    if (!serverMessage.allowBots) {
+                        for (game in games.values.toSet()) {
+                            if (game.tryAddPlayer(connection.player)) {
+                                assignedGame = game
+                                break
+                            }
                         }
                     }
                     if (assignedGame == null) {
@@ -156,9 +159,26 @@ class CommunicationManager {
                             serverMessage.allowBots,
                             this::sendResponses
                         )
-                        assert(assignedGame.tryAddPlayer(connection.player))
+                        assert(assignedGame.tryAddPlayer(connection.player)) { "Could not add player to new game" }
                     }
                     games[connection.player.id] = assignedGame
+                    if (serverMessage.allowBots) {
+                        repeat(serverMessage.playersCount.first() - 1) { _ ->
+                            val id = nextUniqueIndex()
+                            val playerId = nextUniqueIndex()
+                            val botPlayer = Player(playerId, "Bot#$playerId")
+                            val botConnection = BotMessagingManager(
+                                id,
+                                this::receiveMessage,
+                                this::handleMessagingError,
+                                botPlayer,
+                                assignedGame.game
+                            )
+                            launchConnection(botConnection, botPlayer)
+                            assignedGame.addBot(connections.getValue(botConnection.connectionId).player)
+                            games[botPlayer.id] = assignedGame
+                        }
+                    }
                 } //TODO: else send error?
             }
         }
