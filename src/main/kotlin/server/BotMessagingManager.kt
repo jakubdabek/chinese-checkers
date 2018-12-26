@@ -91,7 +91,8 @@ class BotMessagingManager(
             assignedGame.players.size
         )
         val chosenMove = movesSortedByDirection.first()
-        println("[Bot ${connectionId.value}] Chosen moves: $availableMoves, chosen move: $chosenMove")
+        println("[Bot ${connectionId.value}] available moves: $availableMoves")
+        println("[Bot ${connectionId.value}] chosen move: $chosenMove")
         sleep(500)
         onMessageReceived(ChineseCheckersGameMessage.MoveRequested(chosenMove))
     }
