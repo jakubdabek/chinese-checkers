@@ -147,6 +147,7 @@ class CommunicationManager {
                     for (game in games.values.toSet()) {
                         if (game.tryAddPlayer(connection.player)) {
                             assignedGame = game
+                            break
                         }
                     }
                     if (assignedGame == null) {
@@ -155,14 +156,9 @@ class CommunicationManager {
                             serverMessage.allowBots,
                             this::sendResponses
                         )
-                        if (!assignedGame.tryAddPlayer(connection.player)) {
-                            throw Exception("Something went wrong")
-                        }
+                        assert(assignedGame.tryAddPlayer(connection.player))
                     }
                     games[connection.player.id] = assignedGame
-                    connection.messagingManager.sendMessage(
-                        ChineseCheckersGameMessage.GameAssigned(assignedGame.game)
-                    )
                 } //TODO: else send error?
             }
         }

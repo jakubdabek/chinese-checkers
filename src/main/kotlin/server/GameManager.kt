@@ -37,6 +37,10 @@ class GameManager(
         game.players.first { it.id == game.corners.entries.first { entry -> entry.value == corner }.key }
 
     private fun addPlayer(player: Player) {
+        onEvent(makeResponse(
+            ChineseCheckersGameMessage.GameAssigned(game),
+            player
+        ))
         onEvent(game.players.map { Response(ChineseCheckersGameMessage.PlayerJoined(player), it) })
         game.players.add(player)
         if (game.players.size == maxPlayers) {
@@ -44,10 +48,10 @@ class GameManager(
             val possibleCorners = usableCorners.getValue(maxPlayers)
             currentPlayerTurn = Random.nextInt(possibleCorners.size)
             onEvent(game.players.map { Response(ChineseCheckersGameMessage.GameStarted(game.corners.toMap()), it) })
-            onEvent(listOf(
-                Response(ChineseCheckersGameMessage.TurnStarted,
+            onEvent(makeResponse(
+                ChineseCheckersGameMessage.TurnStarted,
                 getPlayerForCorner(possibleCorners[currentPlayerTurn])
-            )))
+            ))
         }
     }
 
