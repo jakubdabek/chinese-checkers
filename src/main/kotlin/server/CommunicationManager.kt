@@ -3,6 +3,7 @@ package server
 import common.Message
 import common.MessagingManager
 import common.Player
+import common.StreamMessagingManager
 import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersClientMessage
 import common.chinesecheckers.ChineseCheckersGameMessage
@@ -32,7 +33,7 @@ class CommunicationManager {
                     logInfo("Listening for a new connection")
                     val newSocket = listener.accept()
                     logInfo("Socket accepted")
-                    val connection = MessagingManager(
+                    val connection = StreamMessagingManager(
                         Random.nextUniqueInt(connections.values.map { it.messagingManager.connectionId.value }),
                         newSocket.getInputStream(),
                         newSocket.getOutputStream(),
@@ -171,7 +172,7 @@ class CommunicationManager {
             if (response.message is ChineseCheckersGameMessage.GameEnded) {
                 games.remove(connection.player.id)
             }
-            connection.messagingManager.sendMessageAsync(response.message)
+            connection.messagingManager.sendMessage(response.message)
         }
     }
 

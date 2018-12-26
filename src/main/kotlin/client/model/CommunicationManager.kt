@@ -2,6 +2,7 @@ package client.model
 
 import common.Message
 import common.MessagingManager
+import common.StreamMessagingManager
 import java.io.InterruptedIOException
 import java.net.Socket
 import kotlin.concurrent.thread
@@ -11,7 +12,7 @@ class CommunicationManager {
     val DEFAULT_PORT = 8888
     val CONNECTION_ID = 1
 
-    lateinit var messagingManager: MessagingManager
+    lateinit var streamMessagingManager: StreamMessagingManager
     lateinit var gameManager: GameManager
         private set
     private lateinit var thread: Thread
@@ -35,14 +36,14 @@ class CommunicationManager {
         thread = thread {
             try {
                 val socket = Socket(ip, port)
-                messagingManager = MessagingManager(
+                streamMessagingManager = StreamMessagingManager(
                     CONNECTION_ID,
                     socket.getInputStream(),
                     socket.getOutputStream(),
                     this::onMessageReceived,
                     this::onError
                 )
-                messagingManager.use { it.launch() }
+                streamMessagingManager.use { it.launch() }
             } catch (ex: InterruptedException) {
             } catch (ex: InterruptedIOException) {
             } catch (ex: Exception) {
@@ -68,6 +69,6 @@ class CommunicationManager {
     }
 
     fun sendMessageToServer(message: Message) {
-        messagingManager.sendMessageAsync(message)
+        streamMessagingManager.sendMessage(message)
     }
 }

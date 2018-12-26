@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 
 
-internal class MessagingManagerTest {
-    private lateinit var messagingManager: MessagingManager
+internal class StreamMessagingManagerTest {
+    private lateinit var messagingManager: StreamMessagingManager
     private lateinit var connection: ConnectionMock
 
     private class ConnectionMock: AutoCloseable {
@@ -61,7 +61,7 @@ internal class MessagingManagerTest {
     @BeforeEach
     fun setUp() {
         connection = ConnectionMock()
-        messagingManager = MessagingManager(
+        messagingManager = StreamMessagingManager(
             123,
             connection.outputPipeInputStream,
             connection.inputPipeOutputStream,
@@ -160,7 +160,7 @@ internal class MessagingManagerTest {
         }
         try {
             Thread.sleep(5000)
-            messagingManager.sendMessageAsync(usedMessage)
+            messagingManager.sendMessage(usedMessage)
             val actual = connection.readMessage()
             Assertions.assertEquals(usedMessage, actual)
 
@@ -188,7 +188,7 @@ internal class MessagingManagerTest {
     @Test
     fun `testing equals on 2 objects with the same id`() {
         val connectionMock = ConnectionMock()
-        val messagingManager2 = MessagingManager(
+        val messagingManager2 = StreamMessagingManager(
             123,
             connectionMock.outputPipeInputStream,
             connectionMock.inputPipeOutputStream,
@@ -203,7 +203,7 @@ internal class MessagingManagerTest {
     @Test
     fun `testing equals on 2 objects with different ids`() {
         val connectionMock = ConnectionMock()
-        val messagingManager2 = MessagingManager(
+        val messagingManager2 = StreamMessagingManager(
             999,
             connectionMock.outputPipeInputStream,
             connectionMock.inputPipeOutputStream,
