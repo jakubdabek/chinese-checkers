@@ -7,12 +7,11 @@ import common.StreamMessagingManager
 import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersClientMessage
 import common.chinesecheckers.ChineseCheckersGameMessage
-import utility.nextUniqueInt
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.ServerSocket
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
-import kotlin.random.Random
 
 
 class CommunicationManager {
@@ -35,7 +34,7 @@ class CommunicationManager {
                     val newSocket = listener.accept()
                     logInfo("Socket accepted")
                     val connection = StreamMessagingManager(
-                        Random.nextUniqueInt(connections.values.map { it.messagingManager.connectionId.value }),
+                        nextUniqueIndex(),
                         newSocket.getInputStream(),
                         newSocket.getOutputStream(),
                         this::receiveMessage,
@@ -54,7 +53,7 @@ class CommunicationManager {
 
     private fun launchConnection(messagingManager: MessagingManager, player: Player? = null) {
         val actualPlayer = player ?: run {
-            val id = Random.nextUniqueInt(connections.values.map { it.player.id.value })
+            val id = nextUniqueIndex()
             Player(id, "User#$id")
         }
         val t = thread(start = false) {
@@ -184,6 +183,10 @@ class CommunicationManager {
         return true
     }
 
+    private companion object {
+        private val uniqueIndexCounter = AtomicInteger(1)
+        fun nextUniqueIndex() = uniqueIndexCounter.getAndIncrement()
+    }
 }
 
 data class Response(val message: Message, val recipient: Player)
