@@ -104,7 +104,7 @@ class AppGameView : View("Chinese checkers") {
                     //visibleProperty().set(false)
                     footer = this
                     //pane {
-                        label("YOUR TOUR") {
+                        label("YOUR TURN") {
                             addClass(Styles.label15)
                             style(append = true) { textFill = c("white") }
                             val transition = FadeTransition(Duration(1000.0),this)
