@@ -69,6 +69,6 @@ class CommunicationManager {
     }
 
     fun sendMessageToServer(message: Message) {
-        socketMessagingManager.sendMessageAsync(message)
+        socketMessagingManager.sendMessage(message)
     }
 }
