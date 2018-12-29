@@ -59,6 +59,7 @@ class BotMessagingManager(
 
                 is ChineseCheckersGameMessage.MoveRequested,
                 is ChineseCheckersGameMessage.AvailableMovesRequested,
+                is ChineseCheckersGameMessage.ExitRequested,
                 is ChineseCheckersGameMessage.PlayerPassed -> TODO("error")
             }
         } else {

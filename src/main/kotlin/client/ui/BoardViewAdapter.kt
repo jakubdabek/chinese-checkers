@@ -20,7 +20,7 @@ import kotlin.math.cos
 class BoardViewAdapter(
     val gameManager: GameManager,
     val availableColors: List<Color>,
-    val chosenColor: ObjectProperty<Paint>
+    val chosenColorProperty: ObjectProperty<Paint>
 ) {
     private val fields get() = gameManager.game.board.fields
     private lateinit var fieldCircles: Map<HexCoord, Circle>
@@ -30,21 +30,13 @@ class BoardViewAdapter(
     private var chosenPawn: Pawn? = null
     var chosenMove: HexMove? = null
     val highlightedCircles = mutableListOf<Circle>()
-    val cornersAndColors = mutableMapOf<Int, Color>()
+    val cornersAndColors: Map<Int, Color>
 
     init {
         gameManager.game.fillBoardCorners(corners)
-        cornersAndColors.put(corners.getValue(gameManager.playerId), chosenColor.get() as Color)
-        for ((color, key) in
-        availableColors.filter { it != chosenColor.get() }
-                zip corners.filter { it.key != gameManager.playerId }.values
-        ) {
-            cornersAndColors[key] = color
-
-        }
-//        println(chosenColor)
-//        println(corners)
-//        println(cornersAndColors)
+        cornersAndColors = availableColors.sortedByDescending { it == chosenColorProperty.get() }
+            .zip(corners.entries.sortedByDescending { it.key == gameManager.playerId }).apply { forEach(::println) }
+            .associate { it.second.value to it.first }
     }
 
     private data class Pawn(var position: HexCoord, val circle: Circle, val color: Color)

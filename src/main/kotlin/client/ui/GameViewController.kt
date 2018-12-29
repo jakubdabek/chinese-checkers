@@ -17,6 +17,7 @@ import tornadofx.*
 
 class GameViewController : Controller() {
     override val scope get() = super.scope as GameScope
+    private val client get() = scope.client
     private val gameManager get() = scope.gameManager
     private val numberOfPlayersChosen get() = scope.chosenPlayerQuantities
     private lateinit var boardViewAdapter: BoardViewAdapter
@@ -26,12 +27,10 @@ class GameViewController : Controller() {
     val chosenColorProperty: SimpleObjectProperty<Paint> = SimpleObjectProperty(Color.DARKSLATEGREY)
     var chosenColor: Paint? by chosenColorProperty
 
-
-
     internal fun initClientAndList() {
         chosenColor = availableColors[0]
-        scope.client.addObserverFunction(gameManager::onMessageReceived)
-        gameManager.setMessageProducedHandler(scope.client::sendMessageToServer)
+        client.addObserverFunction(gameManager::onMessageReceived)
+        gameManager.setMessageProducedHandler(client::sendMessageToServer)
         gameManager.setGameEventHandler(this::handleGameEvent)
 //        gameManager.game.corners[0] = 0
 //        gameManager.game.corners[1] = 3
@@ -110,7 +109,7 @@ class GameViewController : Controller() {
 
     fun exitGame() {
         gameManager.exitGame()
-        scope.client.removeObserverFunction(gameManager::onMessageReceived)
+        client.removeObserverFunction(gameManager::onMessageReceived)
         previousOnCloseRequestHandler?.let { primaryStage.onCloseRequest = it }
         view.replaceWith(find<AppMenuView>(scope.parentScope))
         scope.deregister()
@@ -123,7 +122,7 @@ class GameViewController : Controller() {
     }
 
     fun makeMove(move: HexMove) {
-        scope.client.sendMessageToServer(ChineseCheckersGameMessage.MoveRequested(move))
+        client.sendMessageToServer(ChineseCheckersGameMessage.MoveRequested(move))
     }
 
     fun performReadyClicked() {
@@ -140,6 +139,6 @@ class GameViewController : Controller() {
             gameManager.exitGame()
             previousOnCloseRequestHandler?.handle(it)
         }
-        scope.client.sendMessageToServer(ChineseCheckerServerMessage.GameRequest(numberOfPlayersChosen, scope.allowBots))
+        client.sendMessageToServer(ChineseCheckerServerMessage.GameRequest(numberOfPlayersChosen, scope.allowBots))
     }
 }
