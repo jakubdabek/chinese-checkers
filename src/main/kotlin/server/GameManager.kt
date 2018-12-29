@@ -137,7 +137,7 @@ class GameManager(
         val usableCorners = mapOf(
             2 to listOf(0, 3),
             3 to listOf(0, 2, 4),
-            4 to listOf(0, 1, 4, 5),
+            4 to listOf(0, 1, 3, 4),
             6 to (0..5).toList()
         )
 
