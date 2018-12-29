@@ -51,7 +51,7 @@ class BotMessagingManager(
                     beginTurn()
                 }
 
-                is ChineseCheckersGameMessage.PlayerLeft,
+                is ChineseCheckersGameMessage.PlayerLeftLobby,
                 is ChineseCheckersGameMessage.GameStarted,
                 is ChineseCheckersGameMessage.MoveDone,
                 is ChineseCheckersGameMessage.GameAssigned,

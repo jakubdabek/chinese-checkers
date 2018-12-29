@@ -34,7 +34,7 @@ class GameManager(
             onEvent(game.players.map { Response(ChineseCheckersGameMessage.GameEnded(GameResult.Interrupted), it) })
         } else {
             game.players.remove(player)
-            onEvent(game.players.map { Response(ChineseCheckersGameMessage.PlayerLeft(player), it) })
+            onEvent(game.players.map { Response(ChineseCheckersGameMessage.PlayerLeftLobby(player), it) })
         }
     }
 
@@ -72,7 +72,7 @@ class GameManager(
             is ChineseCheckersGameMessage.TurnStarted,
             is ChineseCheckersGameMessage.GameStarted,
             is ChineseCheckersGameMessage.PlayerJoined,
-            is ChineseCheckersGameMessage.PlayerLeft,
+            is ChineseCheckersGameMessage.PlayerLeftLobby,
             is ChineseCheckersGameMessage.GameEnded,
             is ChineseCheckersGameMessage.MoveDone,
             is ChineseCheckersGameMessage.MoveRejected,

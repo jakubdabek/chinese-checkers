@@ -19,7 +19,7 @@ class GameManager(val player: Player) {
         AvailableMovesChanged,
         GameEndedInterrupted,
         GameEndedConcluded,
-        PlayerLeft,
+        PlayerLeftLobby,
         MoveDone,
         PlayerJoined
     }
@@ -40,11 +40,11 @@ class GameManager(val player: Player) {
         //interpret mess
         //inform board view
         when (message) {
-            is ChineseCheckersGameMessage.GameAssigned -> game = message.game
             is ChineseCheckersGameMessage.MoveRequested,
             is ChineseCheckersGameMessage.PlayerPassed,
             is ChineseCheckersGameMessage.ExitRequested,
             is ChineseCheckersGameMessage.AvailableMovesRequested -> TODO("error")
+            is ChineseCheckersGameMessage.GameAssigned -> game = message.game
             is ChineseCheckersGameMessage.MoveDone -> {
                 game.board.applyMove(message.move)
                 moveToBePerformed = message.move
@@ -59,7 +59,10 @@ class GameManager(val player: Player) {
                 game.players.add(message.player)
                 onGameEvent(Event.PlayerJoined)
             }
-            is ChineseCheckersGameMessage.PlayerLeft -> onGameEvent(Event.PlayerLeft)
+            is ChineseCheckersGameMessage.PlayerLeftLobby -> {
+                game.players.remove(message.player)
+                onGameEvent(Event.PlayerLeftLobby)
+            }
             is ChineseCheckersGameMessage.GameEnded -> {
                 when (message.result) {
                     is GameResult.Interrupted -> onGameEvent(Event.GameEndedInterrupted)

@@ -147,7 +147,7 @@ class CommunicationManager {
                     var assignedGame: GameManager? = null
                     if (!serverMessage.allowBots) {
                         for (game in games.values.toSet()) {
-                            if (game.tryAddPlayer(connection.player)) {
+                            if (game.maxPlayers in serverMessage.playersCount && game.tryAddPlayer(connection.player)) {
                                 assignedGame = game
                                 break
                             }

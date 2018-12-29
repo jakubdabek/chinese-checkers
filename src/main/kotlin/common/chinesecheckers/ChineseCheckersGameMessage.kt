@@ -13,7 +13,7 @@ sealed class ChineseCheckersGameMessage : Message {
     data class PlayerJoined(val player: Player) : ChineseCheckersGameMessage() {
         override val content = player
     }
-    data class PlayerLeft(val player: Player) : ChineseCheckersGameMessage() {
+    data class PlayerLeftLobby(val player: Player) : ChineseCheckersGameMessage() {
         override val content = player
     }
     data class GameEnded(val result: GameResult) : ChineseCheckersGameMessage() {

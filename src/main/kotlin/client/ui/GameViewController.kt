@@ -1,47 +1,40 @@
 package client.ui
 
-import client.model.CommunicationManager
 import client.model.GameManager
+import client.model.GameScope
 import common.HexMove
 import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersGameMessage
 import javafx.beans.property.SimpleObjectProperty
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.Alert
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
+import javafx.stage.WindowEvent
 import tornadofx.*
 
 class GameViewController : Controller() {
-    private lateinit var gameManager: GameManager
+    override val scope get() = super.scope as GameScope
+    private val gameManager get() = scope.gameManager
+    private val numberOfPlayersChosen get() = scope.chosenPlayerQuantities
     private lateinit var boardViewAdapter: BoardViewAdapter
-    private var allowBots: Boolean? = null
-    internal lateinit var client: CommunicationManager
     private val view: AppGameView by inject()
     val availableColors =
         listOf<Color>(Color.RED, Color.GREEN, Color.YELLOW, Color.DARKVIOLET, Color.ORANGE, Color.DARKBLUE)
     val chosenColorProperty: SimpleObjectProperty<Paint> = SimpleObjectProperty(Color.DARKSLATEGREY)
     var chosenColor: Paint? by chosenColorProperty
-    private lateinit var numberOfPlayersChosen: List<Int>
 
 
-    internal fun initClientAndList(
-        client: CommunicationManager,
-        gameManager: GameManager,
-        list: List<Int>,
-        allowBots: Boolean
-    ) {
-        this.client = client
-        this.allowBots = allowBots
-        numberOfPlayersChosen = list
-        chosenColorProperty.set(availableColors[0])
-        gameManager.setMessageProducedHandler(client::sendMessageToServer)
+
+    internal fun initClientAndList() {
+        chosenColor = availableColors[0]
+        scope.client.addObserverFunction(gameManager::onMessageReceived)
+        gameManager.setMessageProducedHandler(scope.client::sendMessageToServer)
         gameManager.setGameEventHandler(this::handleGameEvent)
 //        gameManager.game.corners[0] = 0
 //        gameManager.game.corners[1] = 3
-        this.gameManager = gameManager
-
     }
 
     private fun handleGameEvent(event: GameManager.Event) {
@@ -49,11 +42,11 @@ class GameViewController : Controller() {
             GameManager.Event.GameStarted -> runLater { startGame() }
             GameManager.Event.TurnStarted -> runLater { enableControls() }
             GameManager.Event.AvailableMovesChanged -> runLater { boardViewAdapter.highlightPossibleMoves() }
-            GameManager.Event.GameEndedInterrupted -> runLater { playerLeftHandler() }
+            GameManager.Event.GameEndedInterrupted -> runLater { gameInterruptedHandler() }
             GameManager.Event.GameEndedConcluded -> gameEndedConcludedHandler()
-            GameManager.Event.PlayerLeft -> runLater { playerLeftHandler() }
+            GameManager.Event.PlayerLeftLobby -> Unit
+            GameManager.Event.PlayerJoined -> Unit
             GameManager.Event.MoveDone -> runLater { boardViewAdapter.performMove(gameManager.moveToBePerformed!!) }
-            GameManager.Event.PlayerJoined -> { }
         }
     }
 
@@ -63,7 +56,7 @@ class GameViewController : Controller() {
         }
     }
 
-    private fun playerLeftHandler() {
+    private fun gameInterruptedHandler() {
         val errorWindow = Alert(Alert.AlertType.ERROR)
         errorWindow.headerText = null
         errorWindow.contentText = "Someone has left the game.\nGame is ended.\n"
