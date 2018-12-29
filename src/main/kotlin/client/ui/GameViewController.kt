@@ -106,9 +106,14 @@ class GameViewController : Controller() {
         }
     }
 
+    var previousOnCloseRequestHandler: EventHandler<WindowEvent>? = null
+
     fun exitGame() {
         gameManager.exitGame()
-        view.replaceWith<AppMenuView>()
+        scope.client.removeObserverFunction(gameManager::onMessageReceived)
+        previousOnCloseRequestHandler?.let { primaryStage.onCloseRequest = it }
+        view.replaceWith(find<AppMenuView>(scope.parentScope))
+        scope.deregister()
     }
 
     fun startGame() {
@@ -118,7 +123,7 @@ class GameViewController : Controller() {
     }
 
     fun makeMove(move: HexMove) {
-        client.sendMessageToServer(ChineseCheckersGameMessage.MoveRequested(move))
+        scope.client.sendMessageToServer(ChineseCheckersGameMessage.MoveRequested(move))
     }
 
     fun performReadyClicked() {
@@ -130,6 +135,11 @@ class GameViewController : Controller() {
                 text("waiting for other players to join game...") { addClass(Styles.label) }
             }
         }
-        client.sendMessageToServer(ChineseCheckerServerMessage.GameRequest(numberOfPlayersChosen, allowBots!!))
+        previousOnCloseRequestHandler = primaryStage.onCloseRequest
+        primaryStage.onCloseRequest = EventHandler {
+            gameManager.exitGame()
+            previousOnCloseRequestHandler?.handle(it)
+        }
+        scope.client.sendMessageToServer(ChineseCheckerServerMessage.GameRequest(numberOfPlayersChosen, scope.allowBots))
     }
 }

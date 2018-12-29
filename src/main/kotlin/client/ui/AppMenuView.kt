@@ -1,5 +1,6 @@
 package client.ui
 
+import client.model.MenuScope
 import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.image.ImageView
@@ -16,6 +17,7 @@ class AppMenuView : View("Chinese checkers") {
         const val MIN_WIDTH = AppWelcomeView.MIN_WIDTH
     }
 
+    override val scope get() = super.scope as MenuScope
     private val menuViewController: MenuViewController by inject()
     lateinit var rootVBox: VBox
     lateinit var menuVBox: VBox

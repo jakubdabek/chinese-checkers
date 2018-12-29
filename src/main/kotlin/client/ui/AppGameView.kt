@@ -1,5 +1,6 @@
 package client.ui
 
+import client.model.GameScope
 import common.Player
 import javafx.animation.Animation
 import javafx.animation.FadeTransition
@@ -17,21 +18,12 @@ import tornadofx.*
 
 
 class AppGameView : View("Chinese checkers") {
-    private lateinit var controller: GameViewController
+    override val scope get() = super.scope as GameScope
+    private val controller: GameViewController by inject()
     internal lateinit var footer: HBox
     internal lateinit var endTurnButton: Button
     internal lateinit var passButton: Button
     internal lateinit var readyButton: ToggleButton
-
-    init {
-        controller = find()
-    }
-
-    override fun onDock() {
-        controller = find()
-        //root.center = controller.getBoard()
-    }
-
 
     override val root = with(this) {
         primaryStage.height = AppMenuView.DEFAULT_HEIGHT

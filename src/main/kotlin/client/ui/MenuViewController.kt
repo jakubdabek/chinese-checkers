@@ -1,22 +1,18 @@
 package client.ui
 
-import client.model.CommunicationManager
 import client.model.GameManager
-import common.Player
+import client.model.GameScope
+import client.model.MenuScope
 import javafx.beans.property.SimpleBooleanProperty
-import tornadofx.Controller
+import tornadofx.*
 
 class MenuViewController : Controller() {
     private val view: AppMenuView by inject()
-    private lateinit var client: CommunicationManager
-    private lateinit var player: Player
+    override val scope get() = super.scope as MenuScope
+    private val client get() = scope.communicationManager
+    private val player get() = scope.player
     var numberOfPlayersChosenProperties =
-        listOf(2,3,4,6).map { it to SimpleBooleanProperty() }.toMap()
-
-    fun initCommunicationManager(manager: CommunicationManager, player: Player) {
-        this.client = manager
-        this.player = player
-    }
+        listOf(2,3,4,6).associateWith { SimpleBooleanProperty() }
 
     fun playWithComputerClickHandler() {
         redirectToNextView(true)
@@ -39,10 +35,10 @@ class MenuViewController : Controller() {
 
     fun redirectToNextView(allowBots: Boolean) {
         val gameManager = GameManager(player)
-        client.addObserverFunction(gameManager::onMessageReceived)
         val list = numberOfPlayersChosenProperties.filter { it.value.get() }.map { it.key }
-        find<GameViewController>().initClientAndList(client, gameManager, list, allowBots)
-        view.replaceWith<AppGameView>()
+        val scope = GameScope(scope, gameManager, list, allowBots)
+        find<GameViewController>(scope).initClientAndList()
+        view.replaceWith(find<AppGameView>(scope))
     }
 //    fun serverReturnedGameHandler(message: Message) {
 //        if (message is ChineseCheckersGameMessage.GameAssigned) {

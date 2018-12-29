@@ -1,6 +1,7 @@
 package client.ui
 
 import client.model.CommunicationManager
+import client.model.MenuScope
 import common.Message
 import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersClientMessage
@@ -16,6 +17,7 @@ import java.net.ConnectException
 class WelcomeViewController : Controller() {
     private val view: AppWelcomeView by inject()
     private val client: CommunicationManager = CommunicationManager()
+
     fun connectButtonClickHandler() {
         client.addObserverFunction(this::connectionEstablishedHandler)
         try {
@@ -42,11 +44,12 @@ class WelcomeViewController : Controller() {
 
     fun connectionEstablishedHandler(message: Message) {
         println("connectionEstablishedHandler called")
-        if (message is ChineseCheckersClientMessage.ConnectionEstablished)
+        if (message is ChineseCheckersClientMessage.ConnectionEstablished) {
             runLater {
-                find<MenuViewController>().initCommunicationManager(client,message.player)
+                val menuScope = MenuScope(client, message.player)
                 client.removeObserverFunction(this::connectionEstablishedHandler)
-                view.replaceWith<AppMenuView>()
+                view.replaceWith(find<AppMenuView>(menuScope))
             }
+        }
     }
 }
