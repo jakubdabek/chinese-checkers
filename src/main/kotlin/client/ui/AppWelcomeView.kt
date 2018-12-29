@@ -57,7 +57,14 @@ class AppWelcomeView : View("Chinese checkers") {
                         prefWidthProperty().bind(menuVBox.widthProperty() / 5)
                         text = "localhost"
                         serverIPTextField = this
-                        runLater {  positionCaret(text.length); selectAll(); }
+                        focusedProperty().addListener { _, oldValue, newValue ->
+                            if (oldValue != newValue && newValue)
+                                selectAll()
+                        }
+//                        runLater {
+//                            positionCaret(text.length)
+//                            selectAll()
+//                        }
                     }
                 }
                 button {
@@ -81,10 +88,9 @@ class AppWelcomeView : View("Chinese checkers") {
         }
     }
 
-    private fun makeSound(): Unit {
-
+    private fun makeSound() {
         val media = Media(File("src/main/resources/sound.mp3").toURI().toString())
-        val player: MediaPlayer = MediaPlayer( media)
+        val player = MediaPlayer(media)
         player.play()
     }
 }

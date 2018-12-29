@@ -48,7 +48,10 @@ class AppGameView : View("Chinese checkers") {
                     visibleProperty().set(false)
                     prefWidthProperty().bind(primaryStage.widthProperty())
                     prefHeight = 40.0
-                    button("EXIT GAME") { addClass(Styles.gameButton); action { controller.exitGame() } }
+                    button("EXIT GAME") {
+                        addClass(Styles.gameButton)
+                        action { controller.exitGame() }
+                    }
                     button("WAITING") {
                         endTurnButton = this
                         addClass(Styles.gameButton)
@@ -141,7 +144,7 @@ class AppGameView : View("Chinese checkers") {
                         layoutXProperty().bind(this@pane.widthProperty() / 2)
                         layoutYProperty().bind(this@pane.heightProperty() / 2)
                         onMouseClicked = EventHandler {
-                            controller.chosenColorProperty.set(this.fill)
+                            controller.chosenColor = this.fill
                             this@pane.isVisible = false
                         }
                     }
@@ -150,18 +153,20 @@ class AppGameView : View("Chinese checkers") {
             })
     }
 
-    fun showGameResult(leaderBoard: List<Player>?,currentPlayer: Player) {
-        leaderBoard?.let {
+    fun showGameResult(leaderboard: List<Player>?, currentPlayer: Player) {
+        leaderboard?.let {
             val vbox = vbox {
-                if (leaderBoard[0].id == currentPlayer.id) {
+                if (leaderboard[0].id == currentPlayer.id) {
                     text("INSPIRING VICTORY!\n") { addClass(Styles.label15) }
                 } else {
                     text("IGNOMINIOUS DEFEAT!\n") { addClass(Styles.label15) }
                 }
                 alignment = Pos.CENTER
-                var position = 1
-                for (player in leaderBoard) {
-                    text("$position. Player: ${player.id.value} (nick: ${player.nickname})\n") { addClass(Styles.label15) }
+                leaderboard.forEachIndexed { position, player ->
+                    text {
+                        text = "${position + 1}. Player: ${player.id.value} (nick: ${player.nickname})\n"
+                        addClass(Styles.label15)
+                    }
                 }
                 button("OK") {
                     action {

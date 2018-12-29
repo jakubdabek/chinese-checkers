@@ -22,6 +22,7 @@ class GameViewController : Controller() {
     val availableColors =
         listOf<Color>(Color.RED, Color.GREEN, Color.YELLOW, Color.DARKVIOLET, Color.ORANGE, Color.DARKBLUE)
     val chosenColorProperty: SimpleObjectProperty<Paint> = SimpleObjectProperty(Color.DARKSLATEGREY)
+    var chosenColor: Paint? by chosenColorProperty
     private lateinit var numberOfPlayersChosen: List<Int>
 
 
