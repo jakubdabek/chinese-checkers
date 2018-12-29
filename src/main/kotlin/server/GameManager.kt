@@ -107,7 +107,10 @@ class GameManager(
                     currentPlayerTurn = (currentPlayerTurn + 1) % it.size
                     Response(ChineseCheckersGameMessage.TurnStarted, getPlayerForCorner(it[currentPlayerTurn]))
                 })
-
+            is ChineseCheckersGameMessage.ExitRequested -> {
+                removePlayer(sender)
+                listOf()
+            }
         }
     }
 

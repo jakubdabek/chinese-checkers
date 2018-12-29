@@ -39,6 +39,10 @@ sealed class ChineseCheckersGameMessage : Message {
         override val content: Nothing? = null
         override fun equals(other: Any?) = other is PlayerPassed
     }
+    object ExitRequested: ChineseCheckersGameMessage() {
+        override val content: Nothing? = null
+        override fun equals(other: Any?) = other is ExitRequested
+    }
     object MoveRejected: ChineseCheckersGameMessage() {
         override val content: Nothing? = null
         override fun equals(other: Any?) = other is MoveRejected

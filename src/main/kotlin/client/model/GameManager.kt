@@ -42,6 +42,8 @@ class GameManager(val player: Player) {
         when (message) {
             is ChineseCheckersGameMessage.GameAssigned -> game = message.game
             is ChineseCheckersGameMessage.MoveRequested,
+            is ChineseCheckersGameMessage.PlayerPassed,
+            is ChineseCheckersGameMessage.ExitRequested,
             is ChineseCheckersGameMessage.AvailableMovesRequested -> TODO("error")
             is ChineseCheckersGameMessage.MoveDone -> {
                 game.board.applyMove(message.move)
@@ -52,6 +54,7 @@ class GameManager(val player: Player) {
                 game.corners.putAll(message.playerCorners)
                 onGameEvent(Event.GameStarted)
             }
+            is ChineseCheckersGameMessage.MoveRejected -> TODO("error, wrong move (rare)")
             is ChineseCheckersGameMessage.PlayerJoined -> {
                 game.players.add(message.player)
                 onGameEvent(Event.PlayerJoined)
@@ -101,7 +104,7 @@ class GameManager(val player: Player) {
     }
 
     fun exitGame() {
-        //onMessageProduced(ChineseCheckersGameMessage.GameEnded(GameResult.Interrupted))
+        onMessageProduced(ChineseCheckersGameMessage.ExitRequested)
     }
 
 }
