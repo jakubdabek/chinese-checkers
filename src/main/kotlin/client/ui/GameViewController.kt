@@ -7,6 +7,7 @@ import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersGameMessage
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
+import javafx.scene.control.Alert
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
@@ -47,12 +48,26 @@ class GameViewController : Controller() {
             GameManager.Event.GameStarted -> runLater { startGame() }
             GameManager.Event.TurnStarted -> runLater { enableControls() }
             GameManager.Event.AvailableMovesChanged -> runLater { boardViewAdapter.highlightPossibleMoves() }
-            GameManager.Event.GameEndedInterrupted -> TODO()
-            GameManager.Event.GameEndedConcluded -> TODO()
-            GameManager.Event.PlayerLeft -> TODO()
+            GameManager.Event.GameEndedInterrupted -> runLater { playerLeftHandler() }
+            GameManager.Event.GameEndedConcluded -> gameEndedConcludedHandler()
+            GameManager.Event.PlayerLeft -> runLater { playerLeftHandler() }
             GameManager.Event.MoveDone -> runLater { boardViewAdapter.performMove(gameManager.moveToBePerformed!!) }
             GameManager.Event.PlayerJoined -> { }
         }
+    }
+
+    private fun gameEndedConcludedHandler() {
+        runLater {
+            view.showGameResult(gameManager.leaderBoard,gameManager.player)
+        }
+    }
+
+    private fun playerLeftHandler() {
+        val errorWindow = Alert(Alert.AlertType.ERROR)
+        errorWindow.headerText = null
+        errorWindow.contentText = "Someone has left the game.\nGame is ended.\n"
+        errorWindow.showAndWait()
+        exitGame()
     }
 
     fun getBoard(): Pane {

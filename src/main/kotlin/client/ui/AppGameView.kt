@@ -1,5 +1,6 @@
 package client.ui
 
+import common.Player
 import javafx.animation.Animation
 import javafx.animation.FadeTransition
 import javafx.event.EventHandler
@@ -147,5 +148,30 @@ class AppGameView : View("Chinese checkers") {
                 }
                 this@pane.isVisible = false
             })
+    }
+
+    fun showGameResult(leaderBoard: List<Player>?,currentPlayer: Player) {
+        leaderBoard?.let {
+            val vbox = vbox {
+                if (leaderBoard[0].id == currentPlayer.id) {
+                    text("INSPIRING VICTORY!\n") { addClass(Styles.label15) }
+                } else {
+                    text("IGNOMINIOUS DEFEAT!\n") { addClass(Styles.label15) }
+                }
+                alignment = Pos.CENTER
+                var position = 1
+                for (player in leaderBoard) {
+                    text("$position. Player: ${player.id.value} (nick: ${player.nickname})\n") { addClass(Styles.label15) }
+                }
+                button("OK") {
+                    action {
+                        runLater {
+                            controller.exitGame()
+                        }
+                    }
+                }
+            }
+            this.root.center = vbox
+        }
     }
 }
