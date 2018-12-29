@@ -3,7 +3,7 @@ package server
 import common.*
 import common.chinesecheckers.ChineseCheckersGame
 import common.chinesecheckers.ChineseCheckersGameMessage
-import java.lang.Thread.sleep
+import java.lang.Thread
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.random.Random
@@ -21,7 +21,7 @@ class BotMessagingManager(
     private val rand = Random(player.id.value)
 
     override fun launch() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted) {
             println("[Bot ${connectionId.value}] working")
             val toSend = queue.take()
             processMessage(toSend)
@@ -43,7 +43,7 @@ class BotMessagingManager(
                     beginTurn()
                 }
                 is ChineseCheckersGameMessage.GameEnded -> {
-                    TODO("end game")
+                    Thread.currentThread().interrupt()
                 }
                 is ChineseCheckersGameMessage.MoveRejected -> {
                     if (errorCounter++ > 10)
@@ -94,7 +94,7 @@ class BotMessagingManager(
         val chosenMove = movesSortedByDirection.first()
         println("[Bot ${connectionId.value}] available moves: $availableMoves")
         println("[Bot ${connectionId.value}] chosen move: $chosenMove")
-        sleep(500)
+        Thread.sleep(500)
         onMessageReceived(ChineseCheckersGameMessage.MoveRequested(chosenMove))
     }
 
