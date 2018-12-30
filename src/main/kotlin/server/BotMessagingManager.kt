@@ -119,9 +119,9 @@ class BotMessagingManager(
     }
 
     private fun getBestMove(moves: List<HexMove>, corner: Int, numberOfPlayers: Int) : HexMove? {
-        //TODO("sort by direction")
-        return moves.associateWith { opposites.getValue(corner).run { invoke(it.origin) - invoke(it.destination) } }
-            .run { filter { it.value == map { it.value }.max() }.keys.toList().run { get(rand.nextInt(size)) } }
+        return moves.groupBy { opposites.getValue(corner).run { invoke(it.origin) - invoke(it.destination) } }
+            .maxBy { it.key }?.value
+            ?.let { bestMoves -> bestMoves[rand.nextInt(bestMoves.size)] }
     }
 
     override fun sendMessage(message: Message) {
