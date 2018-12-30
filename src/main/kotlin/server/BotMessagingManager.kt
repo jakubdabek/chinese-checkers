@@ -6,6 +6,7 @@ import common.chinesecheckers.ChineseCheckersGameMessage
 import java.lang.Thread
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
+import kotlin.math.abs
 import kotlin.random.Random
 
 
@@ -29,6 +30,9 @@ class BotMessagingManager(
     }
 
     private var errorCounter: Int = 0
+    private var currentPositionAsked: HexCoord? = null
+    private val maxPositions = 10
+    private var currentMoves = mutableMapOf<HexCoord, List<HexMove>>()
 
     private fun processMessage(message: Message) {
         println("[Bot ${connectionId.value}] message received: ${message::class.simpleName}")
@@ -36,11 +40,17 @@ class BotMessagingManager(
             val gameMessage: ChineseCheckersGameMessage = message
             when (gameMessage) {
                 is ChineseCheckersGameMessage.AvailableMoves -> {
-                    chooseAndRequestMove(gameMessage.moves)
+                    addMoves(gameMessage.moves)
+                    if (currentMoves.size < maxPositions) {
+                        askForAvailableMoves()
+                    } else {
+                        chooseAndRequestMove()
+                    }
                 }
                 is ChineseCheckersGameMessage.TurnStarted -> {
                     errorCounter = 0
-                    beginTurn()
+                    currentMoves.clear()
+                    askForAvailableMoves()
                 }
                 is ChineseCheckersGameMessage.GameEnded -> {
                     Thread.currentThread().interrupt()
@@ -48,7 +58,7 @@ class BotMessagingManager(
                 is ChineseCheckersGameMessage.MoveRejected -> {
                     if (errorCounter++ > 10)
                         assert(false) { "Move rejected too many times" }
-                    beginTurn()
+                    askForAvailableMoves()
                 }
 
                 is ChineseCheckersGameMessage.PlayerLeftLobby,
@@ -67,40 +77,51 @@ class BotMessagingManager(
         }
     }
 
-    private fun beginTurn() {
-        val board = assignedGame.board
-        val positionCoords = choosePawnToMove(board)
-        onMessageReceived(ChineseCheckersGameMessage.AvailableMovesRequested(positionCoords))
-    }
-
-    private fun choosePawnToMove(board: SixSidedStarBoard): HexCoord {
-        val botCorner = assignedGame.corners[player.id]
-        val piecePositions = board.fields.entries.filter { it.value.piece?.cornerId == botCorner }.map { it.key }
-        return piecePositions[rand.nextInt(piecePositions.size)]
-        //TODO("choose fields in a logical way")
-    }
-
-    private fun chooseAndRequestMove(availableMoves: List<HexMove>) {
-        if (availableMoves.isEmpty()) {
-            beginTurn()
-            return
+    private fun addMoves(moves: List<HexMove>) {
+        if (moves.isEmpty()) {
+            currentMoves[currentPositionAsked!!] = listOf()
+        } else {
+            val origin = moves.asSequence().map { it.origin }.distinctBy { it }.single()
+            assert(origin == currentPositionAsked)
+            currentMoves[origin] = moves
         }
+        currentPositionAsked = null
+    }
+
+    private fun askForAvailableMoves() {
+        currentPositionAsked = chooseRandomPawn(assignedGame.board)
+        onMessageReceived(ChineseCheckersGameMessage.AvailableMovesRequested(currentPositionAsked!!))
+    }
+
+    private fun chooseRandomPawn(board: SixSidedStarBoard): HexCoord {
+        val botCorner = assignedGame.corners[player.id]
+        val piecePositions = board.fields.entries
+            .filter { it.value.piece?.cornerId == botCorner }
+            .map { it.key }
+            .filter { it !in currentMoves }
+        return piecePositions[rand.nextInt(piecePositions.size)]
+    }
+
+    private fun chooseAndRequestMove() {
         //val chosenMove = availableMoves.sortedBy { -it.destination.z }.first()
-        val movesSortedByDirection = sortByDirection(
-            availableMoves,
+        val bestMove = getBestMove(
+            currentMoves.flatMap { it.value },
             assignedGame.corners.getValue(player.id),
             assignedGame.players.size
         )
-        val chosenMove = movesSortedByDirection.first()
-        println("[Bot ${connectionId.value}] available moves: $availableMoves")
-        println("[Bot ${connectionId.value}] chosen move: $chosenMove")
-        Thread.sleep(500)
-        onMessageReceived(ChineseCheckersGameMessage.MoveRequested(chosenMove))
+        println("[Bot ${connectionId.value}] available moves: ${currentMoves.flatMap { it.value }}")
+        println("[Bot ${connectionId.value}] chosen move: $bestMove")
+        //Thread.sleep(500)
+        if (bestMove != null)
+            onMessageReceived(ChineseCheckersGameMessage.MoveRequested(bestMove))
+        else
+            onMessageReceived(ChineseCheckersGameMessage.PlayerPassed)
     }
 
-    private fun sortByDirection(moves: List<HexMove>, corner: Int, numberOfPlayers: Int) : List<HexMove> {
+    private fun getBestMove(moves: List<HexMove>, corner: Int, numberOfPlayers: Int) : HexMove? {
         //TODO("sort by direction")
-        return moves.sortedBy { -it.destination.z }
+        return moves.associateWith { opposites.getValue(corner).run { invoke(it.origin) - invoke(it.destination) } }
+            .run { filter { it.value == map { it.value }.max() }.keys.toList().run { get(rand.nextInt(size)) } }
     }
 
     override fun sendMessage(message: Message) {
@@ -108,4 +129,15 @@ class BotMessagingManager(
     }
 
     override fun close() = Unit
+
+    companion object {
+        val opposites = mapOf(
+            0 to { it: HexCoord -> it.z },
+            1 to { it: HexCoord -> -it.y },
+            2 to { it: HexCoord -> it.x },
+            3 to { it: HexCoord -> -it.z },
+            4 to { it: HexCoord -> it.y },
+            5 to { it: HexCoord -> -it.x }
+        )
+    }
 }

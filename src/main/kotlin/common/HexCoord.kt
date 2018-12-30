@@ -1,6 +1,7 @@
 package common
 
 import java.io.Serializable
+import kotlin.math.abs
 
 
 data class HexCoord(val x: Int, val y: Int) : Serializable {
@@ -32,6 +33,8 @@ data class HexCoord(val x: Int, val y: Int) : Serializable {
     }
 }
 
+infix fun HexCoord.dist(other: HexCoord) =
+    listOf(abs(x - other.x), abs(y - other.y), abs(z - other.z)).max()
 
 val HexCoord.neighbours
     get() = HexCoord.directions.map { this + it }
