@@ -17,6 +17,7 @@ class CommunicationManager {
         private set
     private lateinit var thread: Thread
     private val onMessageReceivedHandlers = mutableListOf<(Message) -> Unit>()
+    private val onErrorHandlers = mutableListOf<(Boolean,Exception?) -> Unit>()
 
     fun addObserverFunction(function: (Message) -> Unit) {
         onMessageReceivedHandlers.add(function)
@@ -29,6 +30,20 @@ class CommunicationManager {
     private fun notifyAllObservers(message: Message) {
         for (func in onMessageReceivedHandlers.toList()) {
             func.invoke(message)
+        }
+    }
+
+    fun addOnErrorHandler(handler: (Boolean,Exception?) -> Unit) {
+        onErrorHandlers.add(handler)
+    }
+
+    fun removeHandler(handler: (Boolean,Exception?) -> Unit) {
+        onErrorHandlers.remove(handler)
+    }
+
+    private fun callAllOnErrorHandlers(isFatal: Boolean,ex: Exception?) {
+        for (handler in onErrorHandlers.toList()) {
+            handler.invoke(isFatal,ex)
         }
     }
 
@@ -59,6 +74,7 @@ class CommunicationManager {
 
     private fun onError(connectionId: MessagingManager.Id, ex: Exception?, fatal: Boolean): Boolean {
         println("On error called")
+        callAllOnErrorHandlers(fatal,ex)
         ex?.printStackTrace()
         return false
     }
