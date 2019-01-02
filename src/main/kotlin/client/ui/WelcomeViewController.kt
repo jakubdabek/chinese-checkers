@@ -7,12 +7,9 @@ import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersClientMessage
 import javafx.event.EventHandler
 import javafx.scene.control.Alert
-import javafx.scene.control.Button
-import javafx.scene.control.ButtonType
 import tornadofx.*
 import java.lang.Exception
 import java.lang.Thread.sleep
-import java.net.ConnectException
 
 class WelcomeViewController : Controller() {
     private val view: AppWelcomeView by inject()
@@ -42,7 +39,7 @@ class WelcomeViewController : Controller() {
         //---
     }
 
-    fun connectionEstablishedHandler(message: Message) {
+    private fun connectionEstablishedHandler(message: Message) {
         println("connectionEstablishedHandler called")
         if (message is ChineseCheckersClientMessage.ConnectionEstablished) {
             runLater {

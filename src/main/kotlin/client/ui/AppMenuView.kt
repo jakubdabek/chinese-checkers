@@ -19,9 +19,9 @@ class AppMenuView : View("Chinese checkers") {
 
     override val scope get() = super.scope as MenuScope
     private val menuViewController: MenuViewController by inject()
-    lateinit var rootVBox: VBox
-    lateinit var menuVBox: VBox
-    lateinit var imageLogo: ImageView
+    private lateinit var rootVBox: VBox
+    private lateinit var menuVBox: VBox
+    private lateinit var imageLogo: ImageView
     override val root = with(this) {
         primaryStage.height = DEFAULT_HEIGHT
         primaryStage.width = DEFAULT_WIDTH

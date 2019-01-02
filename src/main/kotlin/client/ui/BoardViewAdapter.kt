@@ -19,7 +19,7 @@ import kotlin.math.cos
 
 class BoardViewAdapter(
     val gameManager: GameManager,
-    val availableColors: List<Color>,
+    private val availableColors: List<Color>,
     val chosenColorProperty: ObjectProperty<Paint>
 ) {
     private val fields get() = gameManager.game.board.fields
