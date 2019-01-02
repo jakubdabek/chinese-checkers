@@ -30,10 +30,23 @@ class GameViewController : Controller() {
     internal fun initClientAndList() {
         chosenColor = availableColors[0]
         client.addObserverFunction(gameManager::onMessageReceived)
+        client.addOnErrorHandler(this::onCommunicationErrorHandler)
         gameManager.setMessageProducedHandler(client::sendMessageToServer)
         gameManager.setGameEventHandler(this::handleGameEvent)
 //        gameManager.game.corners[0] = 0
 //        gameManager.game.corners[1] = 3
+    }
+
+    private fun onCommunicationErrorHandler(fatal: Boolean,exception: Exception?) {
+        val errorWindow = Alert(Alert.AlertType.ERROR)
+        errorWindow.headerText = null
+        errorWindow.contentText = "An error has occured.\n"
+        exception?.let { errorWindow.contentText = "An error has occured.\n"+exception.message }
+        errorWindow.showAndWait()
+        exitGame()
+        if (fatal) {
+            System.exit(0)
+        }
     }
 
     private fun handleGameEvent(event: GameManager.Event) {
@@ -110,6 +123,7 @@ class GameViewController : Controller() {
     fun exitGame() {
         gameManager.exitGame()
         client.removeObserverFunction(gameManager::onMessageReceived)
+        client.removeErrorHandler(this::onCommunicationErrorHandler)
         previousOnCloseRequestHandler?.let { primaryStage.onCloseRequest = it }
         view.replaceWith(find<AppMenuView>(scope.parentScope))
         scope.deregister()

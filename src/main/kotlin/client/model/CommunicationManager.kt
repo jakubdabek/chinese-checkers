@@ -37,7 +37,7 @@ class CommunicationManager {
         onErrorHandlers.add(handler)
     }
 
-    fun removeHandler(handler: (Boolean,Exception?) -> Unit) {
+    fun removeErrorHandler(handler: (Boolean,Exception?) -> Unit) {
         onErrorHandlers.remove(handler)
     }
 
