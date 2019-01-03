@@ -195,8 +195,7 @@ class CommunicationManager {
     }
 
     private fun checkHandshake(handshake: Any?): Boolean {
-        //TODO("check sensibly")
-        return true
+        return handshake is String && handshake == "chinese checkers"
     }
 
     private companion object {
