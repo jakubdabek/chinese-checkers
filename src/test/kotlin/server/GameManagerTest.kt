@@ -33,18 +33,27 @@ internal class GameManagerTest {
             var counter = 0
             gameManager = GameManager(maxPlayers, false) { responses ->
                 when {
-                    counter < maxPlayers -> {
+                    counter < maxPlayers * 2 && counter % 2 == 0 -> {
                         Assertions.assertEquals(
-                            (0 until counter).map {
+                            listOf(Response(
+                                ChineseCheckersGameMessage.GameAssigned(gameManager!!.game),
+                                Player(counter / 2, "${counter / 2}")
+                            )),
+                            responses
+                        )
+                    }
+                    counter < maxPlayers * 2 && counter % 2 == 1 -> {
+                        Assertions.assertEquals(
+                            (0 until counter / 2).map {
                                 Response(
-                                    ChineseCheckersGameMessage.PlayerJoined(Player(counter, "$counter")),
+                                    ChineseCheckersGameMessage.PlayerJoined(Player(counter / 2, "${counter / 2}")),
                                     Player(it, "$it")
                                 )
                             }.toSet(),
                             responses.toSet()
                         )
                     }
-                    counter == maxPlayers -> {
+                    counter == maxPlayers * 2 -> {
                         Assertions.assertEquals(
                             (0 until maxPlayers).map { Player.Id(it) }.zip(corners).toMap(),
                             gameManager!!.game.corners
@@ -74,7 +83,7 @@ internal class GameManagerTest {
                 gameManager!!.tryAddPlayer(Player(it, "$it"))
             }
             gameManager!!.tryAddPlayer(Player(maxPlayers, "$maxPlayers"))
-            Assertions.assertEquals(maxPlayers + 2, counter)
+            Assertions.assertEquals(maxPlayers * 2 + 2, counter)
         }
     }
 }

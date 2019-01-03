@@ -43,11 +43,11 @@ internal class StreamMessagingManagerTest {
     }
 
 
-    private var currentErrorDelegate: ((MessagingManager.Id, Exception?, Boolean) -> Boolean)? = null
+    private var currentErrorDelegate: ((MessagingManager.Id, Exception?, Boolean) -> OnErrorBehaviour)? = null
     private var currentMessageDelegate: ((MessagingManager.Id, Message) -> Unit)? = null
 
-    private fun onError(connectionId: MessagingManager.Id, exception: Exception?, fatal: Boolean): Boolean {
-        return currentErrorDelegate?.invoke(connectionId, exception, fatal) ?: false
+    private fun onError(connectionId: MessagingManager.Id, exception: Exception?, fatal: Boolean): OnErrorBehaviour {
+        return currentErrorDelegate?.invoke(connectionId, exception, fatal) ?: OnErrorBehaviour.DIE
     }
 
     private fun receiveMessage(connectionId: MessagingManager.Id, message: Message) {
@@ -93,8 +93,8 @@ internal class StreamMessagingManagerTest {
         }
         currentErrorDelegate = { _, ex, _ ->
             when(ex) {
-                is InterruptedException -> false
-                is InterruptedIOException -> false
+                is InterruptedException,
+                is InterruptedIOException -> OnErrorBehaviour.DIE
                 else -> Assertions.fail()
             }
         }
@@ -142,8 +142,8 @@ internal class StreamMessagingManagerTest {
         }
         currentErrorDelegate = { _, ex, _ ->
             when(ex) {
-                is InterruptedException -> false
-                is InterruptedIOException -> false
+                is InterruptedException -> OnErrorBehaviour.DIE
+                is InterruptedIOException -> OnErrorBehaviour.DIE
                 else -> Assertions.fail()
             }
         }
@@ -193,7 +193,7 @@ internal class StreamMessagingManagerTest {
             connectionMock.outputPipeInputStream,
             connectionMock.inputPipeOutputStream,
             { _, _ -> },
-            { _, _, _ -> false }
+            { _, _, _ -> OnErrorBehaviour.DIE }
         )
 
         Assertions.assertEquals(messagingManager.hashCode(), messagingManager2.hashCode())
@@ -208,7 +208,7 @@ internal class StreamMessagingManagerTest {
             connectionMock.outputPipeInputStream,
             connectionMock.inputPipeOutputStream,
             { _, _ -> },
-            { _, _, _ -> false }
+            { _, _, _ -> OnErrorBehaviour.DIE }
         )
 
         Assertions.assertNotEquals(messagingManager.hashCode(), messagingManager2.hashCode())
