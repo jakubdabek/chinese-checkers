@@ -1,7 +1,7 @@
 package client.ui
 
 import tornadofx.*
-import java.awt.Font
+
 
 class Styles : Stylesheet() {
     companion object {
@@ -35,7 +35,7 @@ class Styles : Stylesheet() {
         }
         label {
             fontSize = 23.px
-            fontFamily = Font.SANS_SERIF
+            fontFamily = "SansSerif"
             fill = c("white")
         }
         mainVBox {
@@ -54,7 +54,7 @@ class Styles : Stylesheet() {
         }
         label15 {
             fontSize = 15.px
-            fontFamily = Font.SANS_SERIF
+            fontFamily = "SansSerif"
             fill = c("white")
         }
         colorPicker {

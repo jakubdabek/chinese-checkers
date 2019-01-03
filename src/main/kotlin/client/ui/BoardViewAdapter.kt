@@ -18,30 +18,30 @@ import kotlin.math.cos
 
 
 class BoardViewAdapter(
-    val gameManager: GameManager,
+    private val gameManager: GameManager,
     private val availableColors: List<Color>,
-    val chosenColorProperty: ObjectProperty<Paint>
+    private val chosenColorProperty: ObjectProperty<Paint>
 ) {
     private val fields get() = gameManager.game.board.fields
-    private lateinit var fieldCircles: Map<HexCoord, Circle>
     private val players get() = gameManager.game.players
-    val currentNumberOfPlayers get() = gameManager.game.players.count()
+    private val currentNumberOfPlayers get() = gameManager.game.players.count()
     private val corners get() = gameManager.game.corners
+    private lateinit var fieldCircles: Map<HexCoord, Circle>
     private var chosenPawn: Pawn? = null
     var chosenMove: HexMove? = null
-    val highlightedCircles = mutableListOf<Circle>()
-    val cornersAndColors: Map<Int, Color>
+    private val highlightedCircles = mutableListOf<Circle>()
+    private val cornersAndColors: Map<Int, Color>
+    private val pawns = mutableListOf<Pawn>()
 
     init {
         gameManager.game.fillBoardCorners(corners)
         cornersAndColors = availableColors.sortedByDescending { it == chosenColorProperty.get() }
-            .zip(corners.entries.sortedByDescending { it.key == gameManager.playerId }).apply { forEach(::println) }
+            .zip(corners.entries.sortedByDescending { it.key == gameManager.playerId })
             .associate { it.second.value to it.first }
     }
 
     private data class Pawn(var position: HexCoord, val circle: Circle, val color: Color)
 
-    private val pawns = mutableListOf<Pawn>()
     fun getBoard(): Pane {
         val pane = Pane()
         val circles = mutableMapOf<HexCoord, Circle>()

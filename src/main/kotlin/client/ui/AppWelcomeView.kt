@@ -11,14 +11,8 @@ import javafx.scene.media.MediaPlayer
 import tornadofx.*
 import java.io.File
 
-class AppWelcomeView : View("Chinese checkers") {
-    companion object {
-        const val DEFAULT_HEIGHT = 620.0
-        const val DEFAULT_WIDTH = 800.0
-        const val MIN_HEIGHT = 620.0
-        const val MIN_WIDTH = 800.0
-    }
 
+class AppWelcomeView : View("Chinese checkers") {
     private val welcomeViewController: WelcomeViewController by inject()
     private lateinit var rootVBox: VBox
     private lateinit var menuVBox: VBox
@@ -61,10 +55,6 @@ class AppWelcomeView : View("Chinese checkers") {
                             if (oldValue != newValue && newValue)
                                 selectAll()
                         }
-//                        runLater {
-//                            positionCaret(text.length)
-//                            selectAll()
-//                        }
                     }
                 }
                 button {
@@ -92,5 +82,12 @@ class AppWelcomeView : View("Chinese checkers") {
         val media = Media(File("src/main/resources/sound.mp3").toURI().toString())
         val player = MediaPlayer(media)
         player.play()
+    }
+
+    companion object {
+        const val DEFAULT_HEIGHT = 620.0
+        const val DEFAULT_WIDTH = 800.0
+        const val MIN_HEIGHT = 620.0
+        const val MIN_WIDTH = 800.0
     }
 }

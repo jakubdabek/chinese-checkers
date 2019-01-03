@@ -4,6 +4,7 @@ import common.*
 import common.chinesecheckers.ChineseCheckersGame
 import common.chinesecheckers.ChineseCheckersGameMessage
 
+
 class GameManager(val player: Player) {
     lateinit var game: ChineseCheckersGame
         private set
@@ -109,5 +110,4 @@ class GameManager(val player: Player) {
     fun exitGame() {
         onMessageProduced(ChineseCheckersGameMessage.ExitRequested)
     }
-
 }

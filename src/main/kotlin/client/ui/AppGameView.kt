@@ -67,11 +67,6 @@ class AppGameView : View("Chinese checkers") {
                     prefHeightProperty().bind(primaryStage.heightProperty())
                     prefWidthProperty().bind(primaryStage.widthProperty())
                     alignment = Pos.CENTER
-//                    val cp = colorpicker {
-//                        value = c("00E244")
-//                        chosenColorProperty.bind(valueProperty())
-//                        addClass(Styles.colorPicker)
-//                    }
                     val cp = createColorPickerHBox(controller.availableColors, this@stackpane)
                     circle(0.0, 0.0, 120.0) {
                         onMouseClicked = EventHandler { cp.visibleProperty().set(true) }

@@ -37,5 +37,5 @@ class RulesetBuilder {
         GameEndRule(block).also { rules.add(it) }
 }
 
-inline fun buildRuleset(block: RulesetBuilder.() -> Unit) : RuleSet =
+inline fun buildRuleset(block: RulesetBuilder.() -> Unit): RuleSet =
     RulesetBuilder().apply(block).ruleset

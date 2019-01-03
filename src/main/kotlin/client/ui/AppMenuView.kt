@@ -9,6 +9,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import tornadofx.*
 
+
 class AppMenuView : View("Chinese checkers") {
     companion object {
         const val DEFAULT_HEIGHT = AppWelcomeView.DEFAULT_HEIGHT

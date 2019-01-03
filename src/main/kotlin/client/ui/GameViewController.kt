@@ -16,11 +16,13 @@ import javafx.scene.paint.Paint
 import javafx.stage.WindowEvent
 import tornadofx.*
 
+
 class GameViewController : Controller() {
     override val scope get() = super.scope as GameScope
     private val client get() = scope.client
     private val gameManager get() = scope.gameManager
     private val numberOfPlayersChosen get() = scope.chosenPlayerQuantities
+    private var previousOnCloseRequestHandler: EventHandler<WindowEvent>? = null
     private lateinit var boardViewAdapter: BoardViewAdapter
     private val view: AppGameView by inject()
     val availableColors =
@@ -29,12 +31,10 @@ class GameViewController : Controller() {
     var chosenColor: Paint? by chosenColorProperty
 
     internal fun initClientAndList() {
-        chosenColor = availableColors[0]
+        chosenColor = availableColors.first()
         client.registerHandlers(gameManager::onMessageReceived, this::communicationErrorHandler)
         gameManager.setMessageProducedHandler(client::sendMessageToServer)
         gameManager.setGameEventHandler(this::handleGameEvent)
-//        gameManager.game.corners[0] = 0
-//        gameManager.game.corners[1] = 3
     }
 
     private fun communicationErrorHandler(exception: Exception?, fatal: Boolean): OnErrorBehaviour {
@@ -76,10 +76,10 @@ class GameViewController : Controller() {
     fun getBoard(): Pane {
         boardViewAdapter = BoardViewAdapter(gameManager, availableColors, chosenColorProperty)
         //gameManager.setMessageProducedHandler(boardViewAdapter::redrawBoard)
-        val pane = boardViewAdapter.getBoard()
-        pane.prefWidthProperty().bind(view.root.widthProperty())
-        pane.prefHeightProperty().bind(view.root.heightProperty())
-        return pane
+        return boardViewAdapter.getBoard().also { pane ->
+            pane.prefWidthProperty().bind(view.root.widthProperty())
+            pane.prefHeightProperty().bind(view.root.heightProperty())
+        }
     }
 
     fun endTurn() {
@@ -114,8 +114,6 @@ class GameViewController : Controller() {
             view.footer.isVisible = true
         }
     }
-
-    var previousOnCloseRequestHandler: EventHandler<WindowEvent>? = null
 
     fun exitGame() {
         gameManager.exitGame()

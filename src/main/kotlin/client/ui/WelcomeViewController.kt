@@ -9,6 +9,7 @@ import javafx.scene.control.Alert
 import tornadofx.*
 import kotlin.Exception
 
+
 class WelcomeViewController : Controller() {
     private val view: AppWelcomeView by inject()
     private var client: CommunicationManager? = null

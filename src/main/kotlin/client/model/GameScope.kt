@@ -1,6 +1,7 @@
 package client.model
 
-import tornadofx.*
+import tornadofx.Scope
+
 
 class GameScope(
     val parentScope: MenuScope,

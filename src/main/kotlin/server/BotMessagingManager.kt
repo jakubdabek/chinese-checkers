@@ -110,7 +110,7 @@ class BotMessagingManager(
         )
         println("[Bot ${connectionId.value}] available moves: ${currentMoves.flatMap { it.value }}")
         println("[Bot ${connectionId.value}] chosen move: $bestMove")
-        //Thread.sleep(500)
+        Thread.sleep(150)
         if (bestMove != null)
             onMessageReceived(ChineseCheckersGameMessage.MoveRequested(bestMove))
         else
