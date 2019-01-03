@@ -3,6 +3,7 @@ package client.ui
 import client.model.GameManager
 import client.model.GameScope
 import common.HexMove
+import common.OnErrorBehaviour
 import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersGameMessage
 import javafx.beans.property.SimpleObjectProperty
@@ -29,24 +30,20 @@ class GameViewController : Controller() {
 
     internal fun initClientAndList() {
         chosenColor = availableColors[0]
-        client.addObserverFunction(gameManager::onMessageReceived)
-        client.addOnErrorHandler(this::onCommunicationErrorHandler)
+        client.registerHandlers(gameManager::onMessageReceived, this::communicationErrorHandler)
         gameManager.setMessageProducedHandler(client::sendMessageToServer)
         gameManager.setGameEventHandler(this::handleGameEvent)
 //        gameManager.game.corners[0] = 0
 //        gameManager.game.corners[1] = 3
     }
 
-    private fun onCommunicationErrorHandler(fatal: Boolean,exception: Exception?) {
+    private fun communicationErrorHandler(exception: Exception?, fatal: Boolean): OnErrorBehaviour {
         val errorWindow = Alert(Alert.AlertType.ERROR)
         errorWindow.headerText = null
-        errorWindow.contentText = "An error has occured.\n"
-        exception?.let { errorWindow.contentText = "An error has occured.\n"+exception.message }
+        errorWindow.contentText = "An error has occured.\n" + (exception?.message ?: "")
         errorWindow.showAndWait()
         exitGame()
-        if (fatal) {
-            System.exit(0)
-        }
+        return OnErrorBehaviour.DIE
     }
 
     private fun handleGameEvent(event: GameManager.Event) {
@@ -64,7 +61,7 @@ class GameViewController : Controller() {
 
     private fun gameEndedConcludedHandler() {
         runLater {
-            view.showGameResult(gameManager.leaderBoard,gameManager.player)
+            view.showGameResult(gameManager.leaderboard, gameManager.player)
         }
     }
 
@@ -122,8 +119,7 @@ class GameViewController : Controller() {
 
     fun exitGame() {
         gameManager.exitGame()
-        client.removeObserverFunction(gameManager::onMessageReceived)
-        client.removeErrorHandler(this::onCommunicationErrorHandler)
+        client.clearHandlers()
         previousOnCloseRequestHandler?.let { primaryStage.onCloseRequest = it }
         view.replaceWith(find<AppMenuView>(scope.parentScope))
         scope.deregister()

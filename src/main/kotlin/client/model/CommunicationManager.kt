@@ -1,90 +1,86 @@
 package client.model
 
 import common.Message
-import common.MessagingManager
+import common.OnErrorBehaviour
 import common.StreamMessagingManager
+import common.chinesecheckers.ChineseCheckerServerMessage
 import java.io.InterruptedIOException
 import java.net.Socket
 import kotlin.concurrent.thread
 
 
-class CommunicationManager {
-    val DEFAULT_PORT = 8888
-    val CONNECTION_ID = 1
-
-    lateinit var streamMessagingManager: StreamMessagingManager
+class CommunicationManager private constructor() {
+    private lateinit var streamMessagingManager: StreamMessagingManager
+    private lateinit var thread: Thread
     lateinit var gameManager: GameManager
         private set
-    private lateinit var thread: Thread
-    private val onMessageReceivedHandlers = mutableListOf<(Message) -> Unit>()
-    private val onErrorHandlers = mutableListOf<(Boolean,Exception?) -> Unit>()
+    private var onMessageReceived: ((Message) -> Unit)? = null
+    private var onError: ((Exception?, Boolean) -> OnErrorBehaviour)? = null
 
-    fun addObserverFunction(function: (Message) -> Unit) {
-        onMessageReceivedHandlers.add(function)
+    fun registerHandlers(onMessageReceived: (Message) -> Unit, onError: (Exception?, Boolean) -> OnErrorBehaviour) {
+        this.onMessageReceived = onMessageReceived
+        this.onError = onError
     }
 
-    fun removeObserverFunction(function: (Message) -> Unit) {
-        onMessageReceivedHandlers.remove(function)
+    fun clearHandlers() {
+        onMessageReceived = null
+        onError = null
     }
 
-    private fun notifyAllObservers(message: Message) {
-        for (func in onMessageReceivedHandlers.toList()) {
-            func.invoke(message)
-        }
+    private fun handleError(ex: Exception?, fatal: Boolean): OnErrorBehaviour {
+        println("communication error: ${ex?.message ?: "unknown"}")
+        if (ex !is InterruptedException && ex !is InterruptedIOException)
+            ex?.printStackTrace()
+        return onError?.invoke(ex, fatal) ?: OnErrorBehaviour.DIE
     }
 
-    fun addOnErrorHandler(handler: (Boolean,Exception?) -> Unit) {
-        onErrorHandlers.add(handler)
+    private fun handleMessage(message: Message) {
+        println("on message received called ${message::class.simpleName}")
+        onMessageReceived?.invoke(message)
     }
 
-    fun removeErrorHandler(handler: (Boolean,Exception?) -> Unit) {
-        onErrorHandlers.remove(handler)
-    }
-
-    private fun callAllOnErrorHandlers(isFatal: Boolean,ex: Exception?) {
-        for (handler in onErrorHandlers.toList()) {
-            handler.invoke(isFatal,ex)
-        }
-    }
-
-    fun launch(ip: String, port: Int = DEFAULT_PORT) {
-        thread = thread {
-            try {
-                val socket = Socket(ip, port)
-                streamMessagingManager = StreamMessagingManager(
-                    CONNECTION_ID,
-                    socket.getInputStream(),
-                    socket.getOutputStream(),
-                    this::onMessageReceived,
-                    this::onError
-                )
-                streamMessagingManager.use { it.launch() }
-            } catch (ex: InterruptedException) {
-            } catch (ex: InterruptedIOException) {
-            } catch (ex: Exception) {
-                System.err.println("Messaging manager error")
-                ex.printStackTrace()
-            }
-        }
+    fun sendMessageToServer(message: Message) {
+        streamMessagingManager.sendMessage(message)
     }
 
     fun close() {
         thread.interrupt()
     }
 
-    private fun onError(connectionId: MessagingManager.Id, ex: Exception?, fatal: Boolean): Boolean {
-        println("On error called")
-        callAllOnErrorHandlers(fatal,ex)
-        ex?.printStackTrace()
-        return false
-    }
+    companion object {
+        fun launch(
+            onMessageReceived: ((Message) -> Unit),
+            onError: ((Exception?, Boolean) -> OnErrorBehaviour),
+            ip: String,
+            port: Int = DEFAULT_PORT,
+            handshake: Any
+        ) = CommunicationManager().apply {
+            registerHandlers(onMessageReceived, onError)
+            try {
+                val socket = Socket(ip, port)
+                streamMessagingManager = StreamMessagingManager(
+                    CONNECTION_ID,
+                    socket.getInputStream(),
+                    socket.getOutputStream(),
+                    { _, message -> handleMessage(message) },
+                    { _, ex, fatal -> handleError(ex, fatal) }
+                )
+                thread = thread {
+                    try {
+                        streamMessagingManager.use { it.launch() }
+                    } catch (ex: InterruptedException) {
+                    } catch (ex: InterruptedIOException) {
+                    } catch (ex: Exception) {
+                        handleError(ex, true)
+                    }
+                }
+                streamMessagingManager.sendMessage(ChineseCheckerServerMessage.ConnectionRequest(handshake))
+            } catch (ex: Exception) {
+                handleError(ex, true)
+            }
+        }
 
-    private fun onMessageReceived(connectionId: MessagingManager.Id, message: Message) {
-        println("on message received called ${message::class.simpleName}")
-        notifyAllObservers(message)
-    }
-
-    fun sendMessageToServer(message: Message) {
-        streamMessagingManager.sendMessage(message)
+        const val DEFAULT_PORT = 8888
+        const val CONNECTION_ID = 1
     }
 }
