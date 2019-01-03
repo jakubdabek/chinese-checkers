@@ -12,7 +12,7 @@ import kotlin.random.Random
 class BotMessagingManager(
     connectionId: Int,
     onMessageReceived: (connectionId: Id, Message) -> Unit,
-    onError: (connectionId: Id, ex: Exception?, fatal: Boolean) -> Boolean,
+    onError: (connectionId: Id, ex: Exception?, fatal: Boolean) -> OnErrorBehaviour,
     private val player: Player,
     private val assignedGame: ChineseCheckersGame
 ) : MessagingManager(connectionId, onMessageReceived, onError) {

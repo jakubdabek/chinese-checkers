@@ -10,7 +10,7 @@ class GameManager(val player: Player) {
     val playerId get() = player.id
     var possibleMoves: List<HexMove>? = null
     var moveToBePerformed: HexMove? = null
-    var leaderBoard: List<Player>? = null
+    var leaderboard: List<Player>? = null
     private var messageProducedHandler: ((Message) -> Unit)? = null
 
     enum class Event {
@@ -67,7 +67,7 @@ class GameManager(val player: Player) {
                 when (message.result) {
                     is GameResult.Interrupted -> onGameEvent(Event.GameEndedInterrupted)
                     is GameResult.Ended -> {
-                        leaderBoard = message.result.leaderboard
+                        leaderboard = message.result.leaderboard
                         onGameEvent(Event.GameEndedConcluded)
                     }
                 }

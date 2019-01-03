@@ -3,13 +3,13 @@ package common
 abstract class MessagingManager(
     connectionId: Int,
     onMessageReceived: (connectionId: Id, Message) -> Unit,
-    onError: (connectionId: Id, ex: Exception?, fatal: Boolean) -> Boolean
+    onError: (connectionId: Id, ex: Exception?, fatal: Boolean) -> OnErrorBehaviour
 ) : AutoCloseable {
 
     val connectionId = Id(connectionId)
     protected val onMessageReceived: (Message) -> Unit =
         { onMessageReceived(this.connectionId, it) }
-    protected val onError: (ex: Exception?, fatal: Boolean) -> Boolean =
+    protected val onError: (ex: Exception?, fatal: Boolean) -> OnErrorBehaviour =
         { ex, fatal -> onError(this.connectionId, ex, fatal) }
 
     abstract fun launch()

@@ -1,9 +1,6 @@
 package server
 
-import common.Message
-import common.MessagingManager
-import common.Player
-import common.StreamMessagingManager
+import common.*
 import common.chinesecheckers.ChineseCheckerServerMessage
 import common.chinesecheckers.ChineseCheckersClientMessage
 import common.chinesecheckers.ChineseCheckersGameMessage
@@ -100,15 +97,18 @@ class CommunicationManager {
         }
     }
 
-    private fun handleMessagingError(connectionId: MessagingManager.Id, ex: Exception?, fatal: Boolean): Boolean {
+    private fun handleMessagingError(connectionId: MessagingManager.Id, ex: Exception?, fatal: Boolean): OnErrorBehaviour {
         return when (ex) {
             is InterruptedException, is InterruptedIOException -> {
                 logInfo("Connection $connectionId interrupted")
-                false
+                OnErrorBehaviour.DIE
             }
             else -> {
                 logError("Error in connection $connectionId", ex)
-                !fatal
+                if (fatal)
+                    OnErrorBehaviour.DIE
+                else
+                    OnErrorBehaviour.CONTINUE
             }
         }
     }

@@ -11,7 +11,7 @@ class StreamMessagingManager(
     private val inputStream: InputStream,
     private val outputStream: OutputStream,
     onMessageReceived: (connectionId: Id, Message) -> Unit,
-    onError: (connectionId: Id, ex: Exception?, fatal: Boolean) -> Boolean
+    onError: (connectionId: Id, ex: Exception?, fatal: Boolean) -> OnErrorBehaviour
 ) : MessagingManager(connectionId, onMessageReceived, onError) {
 
     private val objectOutput: ObjectOutputStream = ObjectOutputStream(outputStream)
@@ -30,10 +30,10 @@ class StreamMessagingManager(
                     onMessageReceived(message)
                 }
             } catch (ex: InterruptedIOException) {
-                if (!onError(ex, false))
+                if (onError(ex, false) != OnErrorBehaviour.CONTINUE)
                     return
             } catch (ex: InterruptedException) {
-                if (!onError(ex, false))
+                if (onError(ex, false) != OnErrorBehaviour.CONTINUE)
                     return
             } catch (ex: ClassNotFoundException) {
                 onError(ex, true)
