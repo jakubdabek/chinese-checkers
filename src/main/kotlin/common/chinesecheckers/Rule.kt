@@ -16,6 +16,10 @@ class MovementRule(
     }
 }
 
+class ForbiddenMovementRule(
+    val excludeMove: (board: SixSidedStarBoard, move: HexMove) -> Boolean
+) : Rule()
+
 class GameEndRule(
     val checkGameEnd: (game: ChineseCheckersGame) -> GameResult?
 ) : Rule()

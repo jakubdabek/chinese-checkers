@@ -142,6 +142,14 @@ class BoardViewAdapter(
             LineTo(fieldCircles.getValue(it.second).translateX, fieldCircles.getValue(it.second).translateY)
         })
         val pathTransition = PathTransition(Duration(100.0 * path.elements.size), path, movedPawn.circle)
+        pawns.firstOrNull { it.position == move.destination }?.let {
+            val otherPath = Path()
+            otherPath.elements.add(MoveTo(it.circle.translateX, it.circle.translateY))
+            otherPath.elements.add(fieldCircles.getValue(move.origin).let { pos -> LineTo(pos.translateX, pos.translateY) })
+            val otherPathTransition = PathTransition(Duration(100.0), otherPath, it.circle)
+            it.position = move.origin
+            otherPathTransition.play()
+        }
         movedPawn.position = move.destination
         pathTransition.play()
         emptyClickedHandler()

@@ -174,6 +174,28 @@ class GameManager(
                 moves
             }
 
+            addMovementRule { board, position ->
+                val oppositeCondition = board.conditions.getValue(board.fields.getValue(position).piece!!.cornerId.let { (it + 3) % 6 })
+                board.fields.filter { (key) -> oppositeCondition(key) }.let { cornerFieldsMap ->
+                    if (!oppositeCondition(position) &&
+                        position in cornerFieldsMap.keys.map { it.neighbours }.flatten() &&
+                        cornerFieldsMap.all { it.value.piece != null }
+                    ) {
+                        cornerFieldsMap
+                            .filter { it.value.piece!!.cornerId != board.fields.getValue(position).piece!!.cornerId }
+                            .keys
+                            .map { HexMove(listOf(position to it)) }
+                    } else {
+                        listOf()
+                    }
+                }
+            }
+
+            addForbiddenMovementRule { board, move ->
+                val oppositeCondition = board.conditions.getValue(board.fields.getValue(move.origin).piece!!.cornerId.let { (it + 3) % 6 })
+                oppositeCondition(move.origin) && !oppositeCondition(move.destination)
+            }
+
             addGameEndRule { game ->
                 val leaderboard = mutableListOf<Player>()
                 for (corner in game.corners) {

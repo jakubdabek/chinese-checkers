@@ -38,11 +38,13 @@ class GameViewController : Controller() {
     }
 
     private fun communicationErrorHandler(exception: Exception?, fatal: Boolean): OnErrorBehaviour {
-        val errorWindow = Alert(Alert.AlertType.ERROR)
-        errorWindow.headerText = null
-        errorWindow.contentText = "An error has occured.\n" + (exception?.message ?: "")
-        errorWindow.showAndWait()
-        exitGame()
+        runLater {
+            val errorWindow = Alert(Alert.AlertType.ERROR)
+            errorWindow.headerText = null
+            errorWindow.contentText = "An error has occured.\n" + (exception?.message ?: "")
+            errorWindow.showAndWait()
+            exitGame()
+        }
         return OnErrorBehaviour.DIE
     }
 
