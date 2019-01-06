@@ -4,6 +4,6 @@ import java.io.Serializable
 
 
 data class HexMove(val movements: List<Pair<HexCoord, HexCoord>>) : Serializable {
-    val origin = movements.first().first
-    val destination = movements.last().second
+    val origin get() = movements.first().first
+    val destination get() = movements.last().second
 }
