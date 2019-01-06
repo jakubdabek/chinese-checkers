@@ -64,7 +64,9 @@ class CommunicationManager {
             }
             onNormalConnectionTermination(messagingManager.connectionId)
         }
-        connections[messagingManager.connectionId] = Connection(actualPlayer, messagingManager, t)
+        synchronized(this) {
+            connections[messagingManager.connectionId] = Connection(actualPlayer, messagingManager, t)
+        }
         t.start()
         logInfo("Connection ${messagingManager.connectionId.value} started")
     }
@@ -124,6 +126,7 @@ class CommunicationManager {
         println(info)
     }
 
+    @Synchronized
     private fun handleGameMessage(connectionId: MessagingManager.Id, gameMessage: ChineseCheckersGameMessage) {
         val connection = connections.getValue(connectionId)
         games[connection.player.id]?.also {
