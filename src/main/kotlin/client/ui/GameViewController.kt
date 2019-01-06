@@ -15,6 +15,7 @@ import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.stage.WindowEvent
 import tornadofx.*
+import java.io.InterruptedIOException
 
 
 class GameViewController : Controller() {
@@ -38,12 +39,14 @@ class GameViewController : Controller() {
     }
 
     private fun communicationErrorHandler(exception: Exception?, fatal: Boolean): OnErrorBehaviour {
-        runLater {
-            val errorWindow = Alert(Alert.AlertType.ERROR)
-            errorWindow.headerText = null
-            errorWindow.contentText = "An error has occured.\n" + (exception?.message ?: "")
-            errorWindow.showAndWait()
-            exitGame()
+        if (exception !is InterruptedException && exception !is InterruptedIOException) {
+            runLater {
+                val errorWindow = Alert(Alert.AlertType.ERROR)
+                errorWindow.headerText = null
+                errorWindow.contentText = "An error has occured.\n" + (exception?.message ?: "")
+                errorWindow.showAndWait()
+                exitGame()
+            }
         }
         return OnErrorBehaviour.DIE
     }
@@ -54,7 +57,7 @@ class GameViewController : Controller() {
             GameManager.Event.TurnStarted -> runLater { enableControls() }
             GameManager.Event.AvailableMovesChanged -> runLater { boardViewAdapter.highlightPossibleMoves() }
             GameManager.Event.GameEndedInterrupted -> runLater { gameInterruptedHandler() }
-            GameManager.Event.GameEndedConcluded -> gameEndedConcludedHandler()
+            GameManager.Event.GameEndedConcluded -> runLater { gameEndedConcludedHandler() }
             GameManager.Event.PlayerLeftLobby -> Unit
             GameManager.Event.PlayerJoined -> Unit
             GameManager.Event.MoveDone -> runLater { boardViewAdapter.performMove(gameManager.moveToBePerformed!!) }
@@ -62,9 +65,7 @@ class GameViewController : Controller() {
     }
 
     private fun gameEndedConcludedHandler() {
-        runLater {
-            view.showGameResult(gameManager.leaderboard, gameManager.player)
-        }
+        view.showGameResult(gameManager.leaderboard, gameManager.player)
     }
 
     private fun gameInterruptedHandler() {

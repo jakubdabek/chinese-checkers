@@ -67,6 +67,8 @@ class BoardViewAdapter(
                         pawnClickedHandler(pawn)
                         event.consume()
                     }
+                } else {
+                    pawnCircle.isMouseTransparent = true
                 }
             }
         }
