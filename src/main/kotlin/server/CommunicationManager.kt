@@ -79,11 +79,13 @@ class CommunicationManager {
         onConnectionTermination(connectionId)
     }
 
+    @Synchronized
     private fun onConnectionTermination(connectionId: MessagingManager.Id) {
         leaveGame(connections.getValue(connectionId))
         connections.remove(connectionId)
     }
 
+    @Synchronized
     private fun leaveGame(connection: Connection) {
         games[connection.player.id]?.removePlayer(connection.player)
     }
@@ -131,6 +133,7 @@ class CommunicationManager {
         }
     }
 
+    @Synchronized
     private fun handleInternalMessage(connectionId: MessagingManager.Id, serverMessage: ChineseCheckerServerMessage) {
         when (serverMessage) {
             is ChineseCheckerServerMessage.ConnectionRequest -> {
@@ -184,6 +187,7 @@ class CommunicationManager {
         }
     }
 
+    @Synchronized
     private fun sendResponses(responses: List<Response>) {
         for (response in responses) {
             val connection = connections.values.first { it.player == response.recipient }
