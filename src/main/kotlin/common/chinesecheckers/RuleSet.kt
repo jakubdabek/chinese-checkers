@@ -4,7 +4,6 @@ import common.GameResult
 import common.HexCoord
 import common.HexMove
 import common.SixSidedStarBoard
-import utility.partitionByType
 
 
 class RuleSet(private val rules: List<Rule>) {
