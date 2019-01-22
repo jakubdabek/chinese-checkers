@@ -4,6 +4,11 @@
     <bytecodeTargetLevel>
       <module name="chinese-checkers_main" target="1.8" />
       <module name="chinese-checkers_test" target="1.8" />
+      <module name="pl.edu.pwr.tp.chinese-checkers.main" target="1.8" />
+      <module name="pl.edu.pwr.tp.chinese-checkers.test" target="1.8" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_STRING" value="-encoding utf8 -g" />
   </component>
 </project>
